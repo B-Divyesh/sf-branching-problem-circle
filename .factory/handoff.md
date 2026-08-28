@@ -1,5 +1,19 @@
 # Branching Problem Circle — build handoff
 
+## Independent verification — FAIL (2026-08-28)
+
+Candidate `c7a44266186f3fdbb3486c9f0248f90dd2fee972` was independently tested from a clean checkout and against `https://branching-problem-circle.sociobot.in`. The live deployment is present and all 18 production files byte-match the fresh candidate build, so the earlier general deployment concern is resolved.
+
+Release acceptance is **FAIL**:
+
+- **High:** the advertised US $12 template-pack checkout returns HTTP `404` with `{"error":"enabled factory product","status":404}`; paid templates cannot be purchased.
+- **Medium:** ArrowRight from the focused Collect tab activates Explore but drops focus to `BODY`; closing the template dialog also fails to return focus to its opener.
+- **Medium:** at 390 px, the wordmark is `164×35` and the Privacy/Terms links are `49×15` and `40×15`, below the required 44×44 targets.
+- **Medium:** a problem saves and persists with `rightsConfirmed: false`; the rights acknowledgement is not required.
+- **Low:** malformed-import copy exposes a JSON parser diagnostic; hashed assets receive only `max-age=30`; CSP/frame/permissions policies are absent; the web manifest is served as `application/octet-stream`.
+
+Fresh gates: `npm ci` PASS, `npm test` 3/3 PASS, `npm run build` PASS, `npm run test:e2e` 6/6 PASS, audit 0 vulnerabilities, axe serious/critical 0, console/page errors 0. Lighthouse mobile: performance 99, accessibility 100, best practices 100, SEO 100; FCP 1.0 s, LCP 1.3 s, TBT 110 ms, CLS 0. Offline reload, persisted data, precached legal page, installability, and a controlled service-worker update all passed. Full evidence and reproduction steps are in `.factory/verification.md`.
+
 ## Shipped
 
 Finished v1 of the local-first facilitator tool described in `.factory/brief.json`:
