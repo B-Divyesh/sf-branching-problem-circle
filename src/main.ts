@@ -27,18 +27,29 @@ const routePhase = (): Phase | null => {
 function setMetadata(): void {
   const route = location.pathname;
   const site = 'https://branching-problem-circle.sociobot.in';
+  const phase = routePhase();
+  const phaseTitle: Record<Phase, string> = {
+    shape: 'Shape a circle', vote: 'Collect votes', explore: 'Explore approaches', recap: 'Circle recap'
+  };
   const title = isDemo() ? 'Demo — Branching Problem Circle'
+    : phase ? `${phaseTitle[phase]} — Branching Problem Circle`
     : route === '/privacy/' || route === '/privacy' ? 'Privacy — Branching Problem Circle'
     : route === '/terms/' || route === '/terms' ? 'Terms — Branching Problem Circle'
-    : route === '/404' ? 'Page not found — Branching Problem Circle'
+    : route === '/404' || route === '/404.html' ? 'Page not found — Branching Problem Circle'
     : 'Branching Problem Circle — Compare Math Approaches';
-  const description = route === '/demo' ? 'Try a sample math circle with three approaches and anonymous votes.'
+  const description = isDemo() ? 'Try a sample math circle with three approaches and anonymous votes.'
+    : phase ? `${phaseTitle[phase]} on one shared device.`
     : 'Compare several approaches to one math problem on a shared device.';
+  const canonicalPath = isDemo() ? '/demo' : route === '/' ? '/' : route;
+  const canonical = `${site}${canonicalPath}`;
   document.title = title;
   document.querySelector('meta[name="description"]')?.setAttribute('content', description);
-  document.querySelector('link[rel="canonical"]')?.setAttribute('href', `${site}${route === '/' ? '/' : route}`);
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical);
   document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
   document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+  document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical);
+  document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
+  document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
 }
 
 function navigate(path: string, focus = true): void {
@@ -67,7 +78,7 @@ const esc = (value: unknown): string => String(value ?? '')
 function footer(): string {
   return `<footer class="site-footer">
     <span>Circle data stays in this browser · reloads offline after your first visit.</span>
-    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.1.0</span>
+    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.2.0</span>
   </footer>`;
 }
 
@@ -138,7 +149,7 @@ function appHeader(current: CircleSession): string {
       <button class="quiet-button" data-action="import">Import</button>
       <button class="quiet-button danger-text" data-action="clear-circle">Clear circle</button>
     </div>
-    <nav class="site-nav app-links" aria-label="Site"><a href="/demo">Demo</a><a href="/privacy/">Privacy</a></nav>
+    <nav class="site-nav app-links" aria-label="Site"><a href="/demo">Demo</a><a href="/#how-it-works">How it works</a><a href="/privacy/">Privacy</a></nav>
     <nav class="phase-nav" aria-label="Session phases">
       <div role="tablist" aria-label="Session phases">
       ${phases.map(item => `<button role="tab" aria-selected="${current.phase === item.id}" tabindex="${current.phase === item.id ? '0' : '-1'}" class="phase-tab ${current.phase === item.id ? 'active' : ''}" data-phase="${item.id}"><span>${item.short}</span>${item.label}</button>`).join('')}
@@ -383,7 +394,9 @@ app.addEventListener('change', event => {
     try {
       const imported = validateImport(JSON.parse(String(reader.result)));
       if (circle && !confirm(`Replace “${circle.title || 'your current circle'}” with “${imported.title || 'the imported circle'}”?`)) return;
-      circle = imported; void persist('Imported circle saved on this device.');
+      circle = imported;
+      navigate(`/circle/${imported.phase}${isDemo() ? '?demo=1' : ''}`, false);
+      void persist('Imported circle saved on this device.');
     } catch { error = 'This file is not a valid circle export. Choose a JSON file exported by Branching Problem Circle.'; render(); }
   };
   reader.onerror = () => { error = 'That file could not be read. Try exporting it again.'; render(); };
@@ -410,6 +423,7 @@ async function start(): Promise<void> {
     if (isDemo() && !circle) { circle = makeDemoCircle(); await saveCircle(circle); }
     const requestedPhase = routePhase();
     if (circle && requestedPhase) circle.phase = requestedPhase;
+    else if (circle && location.pathname === '/' && !isDemo()) history.replaceState({}, '', `/circle/${circle.phase}`);
   } catch (reason) { error = reason instanceof Error ? reason.message : 'Local storage is unavailable.'; }
   loading = false; setMetadata(); render();
   if ('serviceWorker' in navigator) {

@@ -24,7 +24,7 @@ See the [privacy notice](https://branching-problem-circle.sociobot.in/privacy/) 
 
 ## Demo
 
-`/demo` loads an original hexagon problem with three approaches, six anonymous votes, a revealed hint, and a recap. It uses the separate IndexedDB database `branching-problem-circle-demo`. **Reset demo** restores that sample. **Start for real** returns to the normal `branching-problem-circle` database without copying demo data.
+`/demo` and `/?demo=1` load an original hexagon problem with three approaches, six anonymous votes, a revealed hint, and a recap. The sample is stored separately from your real circles. **Reset demo** restores that sample. **Start for real** returns to your circles without copying demo data.
 
 ## Develop
 

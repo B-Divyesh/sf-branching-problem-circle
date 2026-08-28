@@ -21,6 +21,13 @@
     "sandbox": "fresh /demo context; record every request through reveal flow"
   },
   {
+    "id": "single-device",
+    "claim": "The circle is built for one shared device and has no room, pairing, sync, or public-share path.",
+    "where": "landing limits heading, README introduction",
+    "test": "npm run test:e2e -- --grep @claim:single-device",
+    "sandbox": "fresh /?demo=1 context; inspect storage namespaces, navigation, controls, and requests"
+  },
+  {
     "id": "offline-reload",
     "claim": "The circle reloads offline after the first visit.",
     "where": "footer, README",
@@ -36,10 +43,17 @@
   },
   {
     "id": "recap-export",
-    "claim": "The circle has a printable recap and JSON export.",
+    "claim": "The sample circle prints as a one-page A4 recap and exports as JSON.",
     "where": "landing fact, README",
     "test": "npm run test:e2e -- --grep @claim:recap-export",
-    "sandbox": "fresh /demo context; open recap and assert JSON download"
+    "sandbox": "fresh /demo context; open recap, assert expected print content and one PDF page, then assert JSON download"
+  },
+  {
+    "id": "json-import",
+    "claim": "A valid circle JSON export can be imported.",
+    "where": "landing Import a circle action, README feature list, privacy and terms",
+    "test": "npm run test:e2e -- --grep @claim:json-import",
+    "sandbox": "fresh /demo context; export the sample, enter real mode, confirm replacement preview, reload, and verify demo remains separate"
   },
   {
     "id": "included-templates",

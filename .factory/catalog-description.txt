@@ -1,1 +1,1 @@
-Compare several approaches to one math problem with a shared, offline circle.
+Compare approaches, collect anonymous votes, and reveal hints in an offline math circle.

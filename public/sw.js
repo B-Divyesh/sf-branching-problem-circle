@@ -1,8 +1,8 @@
-const VERSION = 'bpc-v2';
+const VERSION = 'bpc-v3';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 const PRECACHE = [
-  '/', '/index.html', '/demo', '/offline.html', '/privacy/', '/terms/', '/404.html', '/manifest.json',
+  '/', '/index.html', '/demo', '/?demo=1', '/offline.html', '/privacy/', '/terms/', '/404.html', '/manifest.json',
   '/assets/ceramic-paths-768.webp', '/assets/ceramic-paths-1280.webp',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png'
 ];
