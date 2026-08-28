@@ -1,50 +1,26 @@
-# Polish 1 handoff — Branching Problem Circle
+# Review 2 handoff — Branching Problem Circle
 
 ## Outcome
 
-Repair commits: `72d7a4b5e37188fb261b6c42fc81bd3fd7089987` (workflow and review closure), `a55dc1c` (evidence), and `231ebff` (live manifest MIME repair). They close every F-1-1 through F-1-36 finding in `.factory/review-1.md`; the mapping is in `.factory/polish-1.md`.
+Performed the requested adversarial first-read review without changing product code. Wrote `.factory/review-2.md`.
 
-The product remains a static, local-first PWA with the glacial-ceramic visual system. `/demo` now opens a realistic, one-click sample in the separate `branching-problem-circle-demo` IndexedDB database. The persistent banner provides Reset demo and Start for real. The real circle database is `branching-problem-circle` and is never read or written while in demo mode.
+Verdict: **FAIL** with six remaining findings:
 
-The unreachable paid checkout was removed rather than left exposed. All shipped starter templates are included; core authoring, voting, printing, and export remain available.
+1. Unlisted one-shared-device landing/README claim.
+2. README JSON-import promise is not registered or tested.
+3. Printable one-page recap is not proved by the existing claim test.
+4. **Repeated F-1-29:** README leaks `IndexedDB` implementation jargon to facilitators.
+5. **Repeated F-1-14:** Legal/404 routes lack complete social metadata.
+6. **Repeated F-1-17:** 404 header omits the normal `How it works` navigation link.
 
 ## Verification
 
-Run in the repaired worktree:
+- Fresh live browser checks at 390×844 and 1440×900: first screen is clear; no console/page errors.
+- Demo opens populated sample data in one click. Demo uses only `branching-problem-circle-demo`, reset works, and Start for real returns to the normal landing screen without copying data.
+- Demo and landing request logs were same-origin only. A fresh `/demo` visit reloaded offline successfully.
+- Fresh clone `/tmp/bpc-review-vN3u1R`: `npm ci`, `npm test` (5 passing), and `npm run build` passed. Every listed claim command passed in both Playwright projects; the full suite passed 24/24 in the original review worktree.
+- Live crawl checked landing, demo, legal, 404, manifest, sitemap, robots, icons, and assets; ordinary routes were healthy and unknown routes returned designed HTTP 404.
 
-- `npm test` — 5 tests passed.
-- `npm run build` — passed; `dist/` exists with `index.html` at its root.
-- `npm run test:e2e` — 24 Playwright tests passed across desktop and 390×844 mobile.
-- Axe is integrated in the Playwright welcome-page test: zero serious/critical WCAG A/AA violations.
-- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/ /tmp/bpc-evidence` — passed: 534 ms load, title, `lang=en`, one h1, main, image alt, labeled buttons, and zero console/page errors. Screenshots: `/tmp/bpc-evidence/screenshot-desktop.png` and `/tmp/bpc-evidence/screenshot-mobile.png`.
-- Final live production check: `/manifest.json` and compatibility `/manifest.webmanifest` both return JSON MIME; `/not-a-real-route` returns HTTP 404 with the designed title; hashed JS returns `max-age=31536000, immutable`; CSP, frame, permissions, nosniff, and referrer headers are present.
-- Final live cold browser check at `https://branching-problem-circle.sociobot.in/`: correct landing headline, one-click sample banner, sample h1, phase-arrow focus on Explore, and zero console errors. Live Axe at 390px: 0 violations / 0 serious or critical.
-- `tests/deploy-config.test.ts` asserts production 404 rewrite/status, immutable assets, CSP/frame policy, permissions policy, and manifest MIME configuration.
+## Handoff
 
-Final fresh-clone evidence (`/tmp/bpc-final-clean-vtZSgm`, cloned from final `main`): `npm ci`, `npm test` (5 tests), and `npm run build` passed. Every claims command from `.factory/claims.json` passed:
-
-- `@claim:demo-sample`
-- `@claim:demo-isolation`
-- `@claim:browser-only`
-- `@claim:offline-reload`
-- `@claim:six-approaches`
-- `@claim:recap-export`
-- `@claim:included-templates`
-- `@claim:no-public-sharing`
-
-Each ran in desktop and mobile Playwright projects from clean storage. The offline claim waits for the service worker, switches the context offline, reloads `/demo`, and asserts the sample remains visible.
-
-## Run and deploy
-
-```sh
-npm ci
-npm test
-npm run build
-npm run test:e2e
-```
-
-Deploy `dist/` through the static work order. `public/staticwebapp.config.json` is copied into the build and supplies deep routes, the 404 document, cache rules, MIME, and response headers.
-
-## Known gaps
-
-None known. Azure Static Web Apps deployed the final `dist/` successfully (deployment `3fdd5c36-e185-4719-a1d0-b5b0a0e3444d`) and the production-only headers, routing, cache policy, and manifest MIME were checked live. The final initial bundle is 10.65 kB gzip JavaScript and 5.76 kB gzip CSS.
+No product-code files were modified. Commit the two review documentation files after inspecting the findings.
