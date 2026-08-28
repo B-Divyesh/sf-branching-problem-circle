@@ -97,11 +97,11 @@ test('@claim:json-import replaces a real circle from a valid export without chan
   await page.getByLabel(/permission/).check();
   await page.getByRole('button', { name: 'Save problem' }).click();
 
-  page.once('dialog', async dialog => {
-    expect(dialog.message()).toContain('Replace “Circle to replace” with “A hexagon has six corners”?');
-    await dialog.accept();
-  });
+  const replacementPreview = page.waitForEvent('dialog');
   await page.locator('#import-input').setInputFiles(exportPath!);
+  const dialog = await replacementPreview;
+  expect(dialog.message()).toContain('Replace “Circle to replace” with “A hexagon has six corners”?');
+  await dialog.accept();
   await expect(page.getByText('Imported circle saved on this device.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
 
