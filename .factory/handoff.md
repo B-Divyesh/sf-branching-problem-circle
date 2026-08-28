@@ -21,7 +21,7 @@ Run in the repaired worktree:
 - Final live cold browser check at `https://branching-problem-circle.sociobot.in/`: correct landing headline, one-click sample banner, sample h1, phase-arrow focus on Explore, and zero console errors. Live Axe at 390px: 0 violations / 0 serious or critical.
 - `tests/deploy-config.test.ts` asserts production 404 rewrite/status, immutable assets, CSP/frame policy, permissions policy, and manifest MIME configuration.
 
-Fresh-clone evidence (`/tmp/bpc-clean-c9ohXS`, cloned from repair commit): `npm ci` and `npm run build` passed. Every claims command from `.factory/claims.json` passed:
+Final fresh-clone evidence (`/tmp/bpc-final-clean-vtZSgm`, cloned from final `main`): `npm ci`, `npm test` (5 tests), and `npm run build` passed. Every claims command from `.factory/claims.json` passed:
 
 - `@claim:demo-sample`
 - `@claim:demo-isolation`
