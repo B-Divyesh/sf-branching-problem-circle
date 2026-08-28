@@ -1,35 +1,49 @@
-# Review 1 handoff — Branching Problem Circle
+# Polish 1 handoff — Branching Problem Circle
 
 ## Outcome
 
-Adversarial first-read review 1 is complete. Verdict: **FAIL**.
+Repair commit: `72d7a4b5e37188fb261b6c42fc81bd3fd7089987` (will be superseded by this documentation commit). It closes every F-1-1 through F-1-36 finding in `.factory/review-1.md`; the mapping is in `.factory/polish-1.md`.
 
-The full report is in `.factory/review-1.md`. Product code was not modified. The review records 13 blocking findings and 23 additional findings, including the absent/unsafe demo, missing claims registry, dead checkout, broken routing, first-screen copy failure, structure/metadata gaps, and every unresolved defect from the previous handoff.
+The product remains a static, local-first PWA with the glacial-ceramic visual system. `/demo` now opens a realistic, one-click sample in the separate `branching-problem-circle-demo` IndexedDB database. The persistent banner provides Reset demo and Start for real. The real circle database is `branching-problem-circle` and is never read or written while in demo mode.
 
-## Verification performed
+The unreachable paid checkout was removed rather than left exposed. All shipped starter templates are included; core authoring, voting, printing, and export remain available.
 
-- Opened the live site cold at 390×844 and 1440×900 and captured the visible first-screen copy.
-- Opened `/demo`, checked for sample state/banner/reset/start controls, and proved a record saved there appears at `/` through the shared `branching-problem-circle` IndexedDB database.
-- Read `.factory/brief.json`, `.factory/design.md`, the prior handoff, and `.factory/verification.md`; no earlier review or polish files exist.
-- Audited every landing-page and README copy unit with word counts and proposed rewrites for every flag.
-- Confirmed `.factory/claims.json` and `@claim:` tests are absent; inventoried all unlisted claim-like copy.
-- Reproduced every previous defect live and in code: dead paid checkout, phase/dialog focus loss, undersized mobile targets, optional rights acknowledgement, raw import error, short asset cache, missing security headers, and manifest MIME.
-- Audited `/`, `/demo`, `/privacy/`, `/terms/`, and an unknown route for titles, h1, metadata, header/footer, links, and 404 behavior.
-- Confirmed live offline reload and same-origin requests during an ordinary create/save flow. The required demo privacy trace cannot pass because demo mode does not exist.
-- Ran accessibility and basic live smoke checks; no axe, console, missing-alt, or unlabeled-button errors were found.
+## Verification
 
-## Commands run
+Run in the repaired worktree:
+
+- `npm test` — 5 tests passed.
+- `npm run build` — passed; `dist/` exists with `index.html` at its root.
+- `npm run test:e2e` — 24 Playwright tests passed across desktop and 390×844 mobile.
+- Axe is integrated in the Playwright welcome-page test: zero serious/critical WCAG A/AA violations.
+- `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173/ /tmp/bpc-evidence` — passed: 534 ms load, title, `lang=en`, one h1, main, image alt, labeled buttons, and zero console/page errors. Screenshots: `/tmp/bpc-evidence/screenshot-desktop.png` and `/tmp/bpc-evidence/screenshot-mobile.png`.
+- Local manifest response: `Content-Type: application/manifest+json`.
+- `tests/deploy-config.test.ts` asserts production 404 rewrite/status, immutable assets, CSP/frame policy, permissions policy, and manifest MIME configuration.
+
+Fresh-clone evidence (`/tmp/bpc-clean-c9ohXS`, cloned from repair commit): `npm ci` and `npm run build` passed. Every claims command from `.factory/claims.json` passed:
+
+- `@claim:demo-sample`
+- `@claim:demo-isolation`
+- `@claim:browser-only`
+- `@claim:offline-reload`
+- `@claim:six-approaches`
+- `@claim:recap-export`
+- `@claim:included-templates`
+- `@claim:no-public-sharing`
+
+Each ran in desktop and mobile Playwright projects from clean storage. The offline claim waits for the service worker, switches the context offline, reloads `/demo`, and asserts the sample remains visible.
+
+## Run and deploy
 
 ```sh
 npm ci
 npm test
 npm run build
 npm run test:e2e
-/opt/fleet/lib/verify-url.sh https://branching-problem-circle.sociobot.in <temporary-evidence-directory>
 ```
 
-Results: 3/3 unit tests passed, the production build completed and wrote `dist/`, 6/6 Playwright tests passed, the live basic verifier passed, and a live axe WCAG A/AA scan found zero violations. These do not satisfy the missing claims/demo contracts.
+Deploy `dist/` through the static work order. `public/staticwebapp.config.json` is copied into the build and supplies deep routes, the 404 document, cache rules, MIME, and response headers.
 
-## Work remaining
+## Known gaps
 
-Fix all findings in `.factory/review-1.md`, beginning with the plain first screen, isolated seeded demo, claims registry/tests, paid checkout, routing/404, and prior accessibility/data-contract regressions. Then deploy and repeat the full review from clean browser contexts. No product repair was authorized in this work order.
+No product defect is knowingly left. The local Vite preview does not emulate Static Web Apps response headers or unknown-route status, so those production-only settings are validated as configuration and must be rechecked on the deployed host. The attempted standalone Lighthouse CLI could not connect to the bundled Chrome in this container; the prior live audit recorded 99 performance / 100 accessibility, and this repair keeps the initial JS at 10.70 kB gzip and CSS at 5.79 kB gzip.
