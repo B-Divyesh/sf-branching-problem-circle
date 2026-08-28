@@ -1,0 +1,10 @@
+{
+  "slug": "branching-problem-circle",
+  "title": "Branching Problem Circle",
+  "territory": "games-creative",
+  "user": "A volunteer math-circle leader running a small group of curious children who needs to reveal divergent solution paths without turning the session into test prep.",
+  "smallest_useful_product": "Offline-capable facilitator web app: author one problem, add up to six approach branches, collect anonymous ‘try this’ votes, reveal hints/branches, and export a one-page session recap.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "constraints": "No public sharing or child accounts; facilitators supply rights-cleared problems; accessible keyboard voting and printable fallback."
+}
