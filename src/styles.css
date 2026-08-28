@@ -285,6 +285,7 @@ input:hover, textarea:hover { border-color: #667773; }
   .recap-title { padding-bottom: 10px; }
   .recap-title h1 { font-size: 28pt; margin-bottom: 8px; }
   .recap-title p { margin-bottom: 4px; }
+  .recap-title > div:first-child > p:not(.eyebrow), .recap-paths p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
   .recap-stats { margin: 12px 0; }
   .recap-stats div { padding: 6px 9px; }
   .recap-paths h2, .recap-alternatives h2, .reflection h2 { font-size: 16pt; margin-bottom: 8px; }
@@ -292,6 +293,7 @@ input:hover, textarea:hover { border-color: #667773; }
   .recap-paths > ol > li { padding: 9px; border-radius: 8px; }
   .recap-paths h3 { font-size: 11pt; margin-bottom: 3px; }
   .recap-paths p, .recap-paths ul { margin: 4px 0; font-size: 8.5pt; }
+  .recap-paths ul > li:nth-child(n+3), .recap-alternatives li:nth-child(n+5) { display: none; }
   .recap-alternatives, .reflection { margin-top: 10px; }
   .reflection-line { height: 30px; }
   .print-credit { display: block; margin-top: 10px; font-size: 8pt; color: #555; }

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://branching-problem-circle.sociobot.in/sitemap.xml

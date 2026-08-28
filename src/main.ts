@@ -221,6 +221,7 @@ function setPhase(phase: Phase): void {
   if (!circle) return;
   editingBranchId = null;
   circle.phase = phase;
+  render();
   void persist();
 }
 
@@ -351,10 +352,11 @@ async function start(): Promise<void> {
   if (licenseState !== 'free') { licenseState = await verifyLicense(); render(); }
   if ('serviceWorker' in navigator) {
     try {
+      const hadController = Boolean(navigator.serviceWorker.controller);
       const registration = await navigator.serviceWorker.register('/sw.js');
       registration.addEventListener('updatefound', () => {
         const worker = registration.installing;
-        worker?.addEventListener('statechange', () => { if (worker.state === 'activated' && navigator.serviceWorker.controller) { notice = 'The offline app has been updated.'; render(); } });
+        worker?.addEventListener('statechange', () => { if (worker.state === 'activated' && hadController) { notice = 'The offline app has been updated.'; render(); } });
       });
     } catch { /* The app remains usable without install support. */ }
   }
