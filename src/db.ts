@@ -4,9 +4,14 @@ const DB_NAME = 'branching-problem-circle';
 const STORE = 'circles';
 const ACTIVE_KEY = 'active';
 
+function databaseName(): string {
+  return location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1'
+    ? `${DB_NAME}-demo` : DB_NAME;
+}
+
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(databaseName(), 1);
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(STORE)) request.result.createObjectStore(STORE);
     };

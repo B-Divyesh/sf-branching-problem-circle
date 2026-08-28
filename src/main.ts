@@ -1,6 +1,6 @@
 import './styles.css';
 import { clearCircle, loadCircle, saveCircle } from './db';
-import { CHECKOUT_URL, cachedLicenseState, captureLicense, forgetLicense, restoreLicense, verifyLicense, type LicenseState } from './license';
+import { makeDemoCircle } from './demo';
 import { templates } from './templates';
 import { createId, makeBranch, makeCircle, participationCount, totalVotes, validateImport, type Branch, type CircleSession, type Phase } from './types';
 
@@ -14,8 +14,46 @@ let error = '';
 let notice = '';
 let editingBranchId: string | null = null;
 let showTemplates = false;
-let licenseState: LicenseState = 'free';
 let installPrompt: BeforeInstallPromptEvent | null = null;
+let templateOpener: HTMLElement | null = null;
+let routeFocus = false;
+
+const isDemo = (): boolean => location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
+const routePhase = (): Phase | null => {
+  const phase = location.pathname.match(/^\/circle\/(shape|vote|explore|recap)$/)?.[1];
+  return phase as Phase | undefined ?? null;
+};
+
+function setMetadata(): void {
+  const route = location.pathname;
+  const site = 'https://branching-problem-circle.sociobot.in';
+  const title = isDemo() ? 'Demo — Branching Problem Circle'
+    : route === '/privacy/' || route === '/privacy' ? 'Privacy — Branching Problem Circle'
+    : route === '/terms/' || route === '/terms' ? 'Terms — Branching Problem Circle'
+    : route === '/404' ? 'Page not found — Branching Problem Circle'
+    : 'Branching Problem Circle — Compare Math Approaches';
+  const description = route === '/demo' ? 'Try a sample math circle with three approaches and anonymous votes.'
+    : 'Compare several approaches to one math problem on a shared device.';
+  document.title = title;
+  document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', `${site}${route === '/' ? '/' : route}`);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+}
+
+function navigate(path: string, focus = true): void {
+  if (location.pathname !== path) history.pushState({}, '', path);
+  routeFocus = focus;
+  setMetadata();
+  render();
+}
+
+function restoreTemplateFocus(): void {
+  requestAnimationFrame(() => {
+    const replacement = document.querySelector<HTMLElement>('[data-action="templates"]');
+    (replacement ?? templateOpener)?.focus();
+  });
+}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -28,9 +66,16 @@ const esc = (value: unknown): string => String(value ?? '')
 
 function footer(): string {
   return `<footer class="site-footer">
-    <span>Private by design · works offline</span>
-    <span><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · Original AI-generated ceramic artwork</span>
+    <span>Circle data stays in this browser · reloads offline after your first visit.</span>
+    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.1.0</span>
   </footer>`;
+}
+
+function commonHeader(): string {
+  return `<header class="masthead welcome-head">
+    <a class="wordmark" href="/">${icon('branch')}<span>Branching Problem Circle</span></a>
+    <nav class="site-nav" aria-label="Site"><a href="/demo">Demo</a><a href="/#how-it-works">How it works</a><a href="/privacy/">Privacy</a></nav>
+  </header>`;
 }
 
 function icon(name: 'branch' | 'lock' | 'offline' | 'spark'): string {
@@ -44,21 +89,19 @@ function icon(name: 'branch' | 'lock' | 'offline' | 'spark'): string {
 }
 
 function renderWelcome(): string {
-  return `<header class="masthead welcome-head">
-      <a class="wordmark" href="/">${icon('branch')}<span>Branching Problem Circle</span></a>
-      <button class="quiet-button" data-action="templates">Template shelf</button>
-    </header>
+  return `${commonHeader()}
     <main id="main" class="welcome">
       <section class="welcome-copy">
-        <p class="eyebrow">A thinking table for 6–8 curious minds</p>
-        <h1>Let the useful wrong turns stay.</h1>
-        <p class="lede">Hold one problem, collect anonymous “try this” votes, and reveal competing paths when the room is ready. No accounts, rankings, or rush.</p>
+        <p class="eyebrow">For volunteer leaders of small math circles</p>
+        <h1>Compare several approaches to one math problem</h1>
+        <p class="lede">Collect anonymous votes on several approaches, then reveal hints during the discussion.</p>
         <div class="welcome-actions">
-          <button class="primary-button" data-action="new-circle">Shape a new problem</button>
+          <a class="primary-button link-button" href="/demo">Try it with sample data</a><span class="action-help">Opens a sample circle; nothing is saved.</span>
+          <button class="secondary-button" data-action="new-circle">Create a circle</button>
           <button class="text-button" data-action="import">Import a circle</button>
         </div>
         <ul class="proof-points" aria-label="Product qualities">
-          <li><span>01</span> Everything stays on this device</li>
+          <li><span>01</span> Circle data stays in this browser</li>
           <li><span>02</span> Up to six approaches, including dead ends</li>
           <li><span>03</span> One-page printable recap</li>
         </ul>
@@ -68,9 +111,15 @@ function renderWelcome(): string {
           <source type="image/webp" srcset="/assets/ceramic-paths-768.webp 768w, /assets/ceramic-paths-1280.webp 1280w" sizes="(max-width: 800px) calc(100vw - 32px), 52vw" />
           <img src="/assets/ceramic-paths-1280.jpg" width="1280" height="853" fetchpriority="high" decoding="async" alt="Blank handmade ceramic tiles branch three ways around a central tile, with six river stones marking choices." />
         </picture>
-        <figcaption>One problem. More than one honest way in.</figcaption>
+        <figcaption>The illustration shows one problem branching into three approaches.</figcaption>
       </figure>
-    </main>${footer()}`;
+    </main>
+    <section class="landing-details" aria-label="How Branching Problem Circle works">
+      <section class="demo-preview"><p class="eyebrow">See the circle in use</p><h2>One problem, three approaches, a shared discussion</h2><p>Open the sample to inspect votes, hints, and a printable recap before making your own circle.</p><a class="secondary-button link-button" href="/demo">Open the sample circle</a></section>
+      <section id="how-it-works"><p class="eyebrow">How it works</p><ol><li><strong>Write a problem.</strong> Confirm you can use it with your group.</li><li><strong>Add approaches.</strong> Keep up to six possible starts visible.</li><li><strong>Reveal and recap.</strong> Collect votes, open hints, then print or export.</li></ol></section>
+      <section><p class="eyebrow">Limits and privacy</p><h2>Built for one shared device</h2><p>No public sharing, child accounts, rankings, test banks, or generated solutions. Circle data stays in your browser.</p></section>
+      <section><p class="eyebrow">Templates</p><h2>Starter templates are included</h2><p>Authoring, voting, printing, and export are free.</p><button class="secondary-button" data-action="templates">Browse templates</button></section>
+    </section>${footer()}`;
 }
 
 const phases: { id: Phase; short: string; label: string }[] = [
@@ -89,6 +138,7 @@ function appHeader(current: CircleSession): string {
       <button class="quiet-button" data-action="import">Import</button>
       <button class="quiet-button danger-text" data-action="clear-circle">Clear circle</button>
     </div>
+    <nav class="site-nav app-links" aria-label="Site"><a href="/demo">Demo</a><a href="/privacy/">Privacy</a></nav>
     <nav class="phase-nav" aria-label="Session phases">
       <div role="tablist" aria-label="Session phases">
       ${phases.map(item => `<button role="tab" aria-selected="${current.phase === item.id}" tabindex="${current.phase === item.id ? '0' : '-1'}" class="phase-tab ${current.phase === item.id ? 'active' : ''}" data-phase="${item.id}"><span>${item.short}</span>${item.label}</button>`).join('')}
@@ -101,19 +151,19 @@ function renderShape(current: CircleSession): string {
   const editing = editingBranchId === 'new' ? makeBranch() : current.branches.find(branch => branch.id === editingBranchId);
   return `<main id="main" class="workspace">
     <section class="work-intro">
-      <div><p class="eyebrow">Shape the problem</p><h1>${current.title ? esc(current.title) : 'Set one generous problem.'}</h1></div>
-      <p>Give the room enough to begin. Keep solutions behind the tiles until discussion earns them.</p>
+      <div><p class="eyebrow">Write the problem</p><h1>${current.title ? esc(current.title) : 'Create a math circle'}</h1></div>
+      <p>Write one problem and keep facilitator notes hidden until you choose to reveal them.</p>
     </section>
     <form id="problem-form" class="problem-form" novalidate>
       <div class="field"><label for="title">Circle title <span>required</span></label><input id="title" name="title" required maxlength="80" value="${esc(current.title)}" autocomplete="off" /></div>
       <div class="field"><label for="problem">Problem prompt <span>required</span></label><textarea id="problem" name="problem" required maxlength="1600" rows="5">${esc(current.problem)}</textarea><small>Write what participants may see. No solution belongs here.</small></div>
       <div class="field"><label for="source">Source or credit</label><input id="source" name="source" maxlength="160" value="${esc(current.source)}" placeholder="e.g. My own problem, or book + page" /></div>
-      <label class="check"><input type="checkbox" name="rights" ${current.rightsConfirmed ? 'checked' : ''} /> <span>I have permission to use this problem with my group.</span></label>
+      <label class="check"><input type="checkbox" name="rights" required ${current.rightsConfirmed ? 'checked' : ''} /> <span>I have permission to use this problem with my group. Required.</span></label>
       <div class="form-end"><span class="save-note">Saved only in this browser</span><button class="primary-button" type="submit">Save problem</button></div>
     </form>
     <section class="approach-section" aria-labelledby="approach-heading">
       <div class="section-heading"><div><p class="eyebrow">Approach tiles</p><h2 id="approach-heading">Make room for competing starts.</h2></div><button class="secondary-button" data-action="add-branch" ${current.branches.length >= 6 ? 'disabled' : ''}>Add approach <span>${current.branches.length}/6</span></button></div>
-      ${current.branches.length ? `<ol class="author-branches">${current.branches.map((branch, index) => `<li><span class="branch-number">${String(index + 1).padStart(2, '0')}</span><div><h3>${esc(branch.title)}</h3><p>${esc(branch.firstStep || 'No opening move added yet.')}</p></div><button class="text-button" data-action="edit-branch" data-id="${branch.id}">Edit</button><button class="text-button danger-text" data-action="delete-branch" data-id="${branch.id}">Remove</button></li>`).join('')}</ol>` : `<div class="empty-piece"><span class="empty-mark">Y</span><div><h3>No approaches yet</h3><p>Add the first plausible start—even one you expect to fail productively.</p></div></div>`}
+      ${current.branches.length ? `<ol class="author-branches">${current.branches.map((branch, index) => `<li><span class="branch-number">${String(index + 1).padStart(2, '0')}</span><div><h3>${esc(branch.title)}</h3><p>${esc(branch.firstStep || 'No opening move added yet.')}</p></div><button class="text-button" data-action="edit-branch" data-id="${branch.id}">Edit</button><button class="text-button danger-text" data-action="delete-branch" data-id="${branch.id}">Remove</button></li>`).join('')}</ol>` : `<div class="empty-piece"><span class="empty-mark">+</span><div><h3>No approaches yet</h3><p>Add the first possible method, including one that may fail.</p></div></div>`}
     </section>
     ${editing ? renderBranchEditor(editing, editingBranchId === 'new') : ''}
   </main>`;
@@ -180,49 +230,59 @@ function renderRecap(current: CircleSession): string {
 }
 
 function templateDialog(): string {
-  const unlocked = licenseState === 'unlocked';
-  const statusText = licenseState === 'checking' ? 'Checking license…' : licenseState === 'offline' ? 'License check is unavailable offline.' : licenseState === 'invalid' ? 'This license is no longer active.' : unlocked ? 'Template pack unlocked on this device.' : 'Core circles are free. The optional pack adds reusable facilitation structures.';
   return `<dialog id="template-dialog" class="template-dialog" aria-labelledby="template-title">
-    <div class="dialog-head"><div><p class="eyebrow">Facilitator shelf</p><h2 id="template-title">Begin with a useful shape.</h2></div><button class="icon-button" data-action="close-templates" aria-label="Close templates">×</button></div>
-    <p>${statusText}</p>
-    <div class="template-grid">${templates.map(template => `<article><div class="template-tag">${template.paid ? `${icon('lock')} Pack` : 'Included'}</div><h3>${esc(template.name)}</h3><p>${esc(template.description)}</p><button class="secondary-button" data-action="use-template" data-id="${template.id}" ${template.paid && !unlocked ? 'disabled' : ''}>Use template</button></article>`).join('')}</div>
-    ${!unlocked ? `<aside class="unlock-panel"><div>${icon('spark')}<h3>Facilitator template pack</h3><p>Four repeatable session shapes · US $12 one-time purchase. Checkout and refunds are handled by Sociobot/Dodo.</p></div><a class="primary-button link-button" href="${CHECKOUT_URL}">Buy the pack</a></aside>
-    <form id="license-form" class="license-form"><label for="license-token">Have a license? Paste it here</label><div><input id="license-token" name="token" required autocomplete="off" /><button class="secondary-button" type="submit">Restore purchase</button></div></form>` : `<button class="text-button" data-action="forget-license">Remove license from this device</button>`}
+    <div class="dialog-head"><div><p class="eyebrow">Templates</p><h2 id="template-title">Choose a session template</h2></div><button class="icon-button" data-action="close-templates" aria-label="Close templates">×</button></div>
+    <p>These starter templates are included. They replace the current circle only after you confirm.</p>
+    <div class="template-grid">${templates.map(template => `<article><div class="template-tag">Included</div><h3>${esc(template.name)}</h3><p>${esc(template.description)}</p><button class="secondary-button" data-action="use-template" data-id="${template.id}">Use template</button></article>`).join('')}</div>
     <p class="dialog-legal"><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
   </dialog>`;
 }
 
 function render(): void {
   if (loading) {
-    app.innerHTML = `<main id="main" class="loading-piece" aria-live="polite"><div class="loading-tile"></div><h1>Setting the thinking table…</h1></main>`;
+    app.innerHTML = `<main id="main" class="loading-piece" aria-live="polite"><div class="loading-tile"></div><h1>Loading your circle</h1></main>`;
     return;
   }
-  const status = `<div class="toast-region" aria-live="polite" aria-atomic="true">${error ? `<div class="toast error">${esc(error)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : notice ? `<div class="toast">${esc(notice)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : ''}</div>`;
+  const status = `<div class="route-status visually-hidden" aria-live="polite">${esc(document.title)}</div><div class="toast-region" aria-live="polite" aria-atomic="true">${error ? `<div class="toast error">${esc(error)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : notice ? `<div class="toast">${esc(notice)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : ''}</div>`;
+  const demoBanner = isDemo() ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span><button class="text-button" data-action="reset-demo">Reset demo</button><a class="text-button" href="/">Start for real</a></span></aside>` : '';
   if (!circle) app.innerHTML = `${renderWelcome()}${status}${showTemplates ? templateDialog() : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
   else {
     const phaseContent = circle.phase === 'shape' ? renderShape(circle) : circle.phase === 'vote' ? renderVote(circle) : circle.phase === 'explore' ? renderExplore(circle) : renderRecap(circle);
-    app.innerHTML = `${appHeader(circle)}${phaseContent}${footer()}${status}${showTemplates ? templateDialog() : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
+    app.innerHTML = `${demoBanner}${appHeader(circle)}${phaseContent}${footer()}${status}${showTemplates ? templateDialog() : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
   }
   if (showTemplates) {
     const dialog = document.querySelector<HTMLDialogElement>('#template-dialog');
     dialog?.showModal();
-    dialog?.addEventListener('cancel', () => { showTemplates = false; render(); }, { once: true });
+    dialog?.addEventListener('cancel', event => {
+      event.preventDefault();
+      showTemplates = false;
+      render();
+      restoreTemplateFocus();
+    }, { once: true });
+  }
+  if (routeFocus) {
+    routeFocus = false;
+    requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>('main h1');
+      if (heading) { heading.tabIndex = -1; heading.focus(); }
+    });
   }
 }
 
-async function persist(message?: string): Promise<void> {
+async function persist(message?: string, retainPhaseFocus = false, rerender = true): Promise<void> {
   if (!circle) return;
   try { await saveCircle(circle); error = ''; if (message) notice = message; }
   catch (reason) { error = reason instanceof Error ? reason.message : 'The circle could not be saved.'; }
-  render();
+  if (rerender || error) render();
+  if (retainPhaseFocus && circle) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[role="tab"][data-phase="${circle?.phase}"]`)?.focus());
 }
 
 function setPhase(phase: Phase): void {
   if (!circle) return;
   editingBranchId = null;
   circle.phase = phase;
-  render();
-  void persist();
+  navigate(`/circle/${phase}${isDemo() ? '?demo=1' : ''}`, false);
+  void persist(undefined, true, false);
 }
 
 function downloadData(): void {
@@ -243,9 +303,10 @@ app.addEventListener('click', event => {
   if (!target) return;
   if (target.dataset.phase) { setPhase(target.dataset.phase as Phase); return; }
   const action = target.dataset.action;
-  if (action === 'new-circle') { circle = makeCircle(); void persist('A blank thinking table is ready.'); }
-  if (action === 'templates') { showTemplates = true; render(); }
-  if (action === 'close-templates') { showTemplates = false; render(); }
+  if (action === 'new-circle') { circle = makeCircle(); navigate('/circle/shape'); void persist('A blank circle is ready.'); }
+  if (action === 'templates') { templateOpener = target; showTemplates = true; render(); }
+  if (action === 'close-templates') { showTemplates = false; render(); restoreTemplateFocus(); }
+  if (action === 'reset-demo' && isDemo()) { circle = makeDemoCircle(); editingBranchId = null; void clearCircle().then(() => persist('The sample circle was reset.')); }
   if (action === 'dismiss-status') { notice = ''; error = ''; render(); }
   if (action === 'add-branch' && circle) { editingBranchId = 'new'; render(); document.querySelector('#branch-editor-heading')?.scrollIntoView({ behavior: 'smooth' }); }
   if (action === 'cancel-branch') { editingBranchId = null; render(); }
@@ -270,12 +331,14 @@ app.addEventListener('click', event => {
   }
   if (action === 'print') window.print();
   if (action === 'install' && installPrompt) { void installPrompt.prompt().then(() => { installPrompt = null; render(); }); }
-  if (action === 'forget-license') { forgetLicense(); licenseState = 'free'; render(); }
   if (action === 'use-template') {
     const template = templates.find(item => item.id === target.dataset.id);
-    if (template && (!template.paid || licenseState === 'unlocked')) {
+    if (template) {
       const replace = !circle || confirm(`Replace “${circle.title || 'your current circle'}” with the ${template.name} template? Export first if you want to keep it.`);
-      if (replace) { circle = template.build(); showTemplates = false; void persist(`${template.name} is ready to shape.`); }
+      if (replace) {
+        circle = template.build(); showTemplates = false;
+        void persist(`${template.name} is ready to shape.`).then(restoreTemplateFocus);
+      }
     }
   }
 });
@@ -310,10 +373,6 @@ app.addEventListener('submit', event => {
     if (alternative) circle.alternativeIdeas.push({ id: createId(), text: alternative, createdAt: now });
     void persist('Idea placed. Pass the device to the next thinker.');
   }
-  if (form.id === 'license-form') {
-    const token = String(data.get('token') ?? '').trim();
-    if (token) { restoreLicense(token); licenseState = 'checking'; render(); void verifyLicense(true).then(state => { licenseState = state; render(); }); }
-  }
 });
 
 app.addEventListener('change', event => {
@@ -325,7 +384,7 @@ app.addEventListener('change', event => {
       const imported = validateImport(JSON.parse(String(reader.result)));
       if (circle && !confirm(`Replace “${circle.title || 'your current circle'}” with “${imported.title || 'the imported circle'}”?`)) return;
       circle = imported; void persist('Imported circle saved on this device.');
-    } catch (reason) { error = reason instanceof Error ? reason.message : 'That file could not be imported.'; render(); }
+    } catch { error = 'This file is not a valid circle export. Choose a JSON file exported by Branching Problem Circle.'; render(); }
   };
   reader.onerror = () => { error = 'That file could not be read. Try exporting it again.'; render(); };
   reader.readAsText(input.files[0]);
@@ -338,18 +397,21 @@ app.addEventListener('keydown', event => {
   const tabs = [...document.querySelectorAll<HTMLElement>('[role="tab"]')];
   const index = tabs.indexOf(tab);
   const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-  tabs[next].focus(); tabs[next].click();
+  setPhase(tabs[next].dataset.phase as Phase);
+  requestAnimationFrame(() => document.querySelector<HTMLElement>(`[role="tab"][data-phase="${tabs[next].dataset.phase}"]`)?.focus());
 });
 
 window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); installPrompt = event as BeforeInstallPromptEvent; render(); });
 window.addEventListener('online', render); window.addEventListener('offline', render);
 
 async function start(): Promise<void> {
-  captureLicense();
-  licenseState = cachedLicenseState();
-  try { circle = await loadCircle(); } catch (reason) { error = reason instanceof Error ? reason.message : 'Local storage is unavailable.'; }
-  loading = false; render();
-  if (licenseState !== 'free') { licenseState = await verifyLicense(); render(); }
+  try {
+    circle = await loadCircle();
+    if (isDemo() && !circle) { circle = makeDemoCircle(); await saveCircle(circle); }
+    const requestedPhase = routePhase();
+    if (circle && requestedPhase) circle.phase = requestedPhase;
+  } catch (reason) { error = reason instanceof Error ? reason.message : 'Local storage is unavailable.'; }
+  loading = false; setMetadata(); render();
   if ('serviceWorker' in navigator) {
     try {
       const hadController = Boolean(navigator.serviceWorker.controller);
@@ -361,5 +423,11 @@ async function start(): Promise<void> {
     } catch { /* The app remains usable without install support. */ }
   }
 }
+
+window.addEventListener('popstate', async () => {
+  const requestedPhase = routePhase();
+  if (circle && requestedPhase) { circle.phase = requestedPhase; routeFocus = true; render(); }
+  else if (location.pathname === '/' || location.pathname === '/demo') { routeFocus = true; render(); }
+});
 
 void start();
