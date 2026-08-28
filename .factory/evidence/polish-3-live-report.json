@@ -1,0 +1,91 @@
+{
+  "base": "https://branching-problem-circle.sociobot.in",
+  "checkedAt": "2026-08-28T23:25:15.339Z",
+  "checks": [
+    {
+      "name": "security headers",
+      "detail": "pass"
+    },
+    {
+      "name": "cache and manifest headers",
+      "detail": "/assets/app-BmxgZCJR.js"
+    },
+    {
+      "name": "real 404 status",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe home desktop",
+      "detail": "pass"
+    },
+    {
+      "name": "cold first screen desktop",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe home mobile",
+      "detail": "pass"
+    },
+    {
+      "name": "cold first screen mobile",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe demo",
+      "detail": "pass"
+    },
+    {
+      "name": "demo exit disposal, pristine re-entry, and reset",
+      "detail": "pass"
+    },
+    {
+      "name": "keyboard phase focus and one-page recap",
+      "detail": "pass"
+    },
+    {
+      "name": "rights enforcement, import recovery, preview, and persistence",
+      "detail": "pass"
+    },
+    {
+      "name": "mobile layout and 44px targets",
+      "detail": "pass"
+    },
+    {
+      "name": "cold demo offline reload",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe /privacy/",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe /terms/",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe /offline.html",
+      "detail": "pass"
+    },
+    {
+      "name": "structure and axe /not-a-real-polish-3-route",
+      "detail": "pass"
+    },
+    {
+      "name": "console and privacy request log",
+      "detail": "no unexpected errors; 45 same-origin GET requests"
+    },
+    {
+      "name": "internal link crawl",
+      "detail": "6 unique links"
+    }
+  ],
+  "errors": [],
+  "expected404Errors": [
+    {
+      "kind": "console",
+      "text": "Failed to load resource: the server responded with a status of 404 ()",
+      "url": "https://branching-problem-circle.sociobot.in/not-a-real-polish-3-route"
+    }
+  ],
+  "requests": 45
+}

@@ -43,6 +43,7 @@ No environment variables or backend are required.
 npm test
 npm run build
 npm run test:e2e
+LIVE_BASE_URL=https://branching-problem-circle.sociobot.in npm run test:live
 ```
 
 `npm run build` type-checks the app and writes the static deploy to `dist/`, with `dist/index.html` at its root. Browser tests use Playwright 1.58.2. They cover the demo, claims, accessibility, keyboard focus, mobile targets, import recovery, privacy, and offline reload.

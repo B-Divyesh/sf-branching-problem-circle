@@ -34,12 +34,12 @@ Body text on `--ice` and `--slip` is at least 7:1. Cobalt, lichen, ochre, and ox
 
 An 8px base rhythm with 4px used only for optical adjustment. Content maxes at 1180px. Primary reading columns max at 720px. Controls are at least 44px high with 8px separation. Corners use 18–28px soft ceramic radii; approach tiles alternate subtly asymmetric corner recipes to feel formed rather than manufactured. Shadows are cool, short, and diffuse; hairline borders do most of the depth work.
 
-On phones, the facilitator rail becomes a compact top status area and branch tiles stack. The session phase switcher scrolls horizontally. Authoring forms and projection controls retain full labels. The decorative hero is cropped and recedes behind the core “Start a circle” action.
+On phones, the facilitator rail becomes a compact top status area and branch tiles stack. The four session phases fit in one row with numbers above labels. Authoring forms and projection controls retain full labels. The decorative hero is cropped and recedes behind the sample-first action.
 
 ## Interaction grammar
 
 - `Write` creates or edits the problem and its approaches.
-- `Invite ideas` opens the anonymous participant voting view with a short room code.
+- `Collect` opens the anonymous voting view on the shared device.
 - `Open hint` and `Reveal note` uncover content in facilitator-controlled order.
 - Votes appear as small cobalt glaze beads and exact counts, never a leaderboard.
 - Every mutation confirms in a restrained live region. Destructive actions name the target and require confirmation; import previews before replacement.

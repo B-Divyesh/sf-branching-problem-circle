@@ -89,7 +89,7 @@ The remaining ceramic language describes the original artwork and physical shape
 
 ## README
 
-Every visitor-facing README sentence is 20 words or fewer. The former untestable outcome promise is gone. Its replacement, `Keep up to six approaches visible during one discussion.`, is covered by `six-approaches`.
+Every visitor-facing product sentence in the README is 20 words or fewer. The former untestable outcome promise is gone. Its replacement, `Keep up to six approaches visible during one discussion.`, is covered by `six-approaches`. Test and deployment instructions are technical documentation, not product promises.
 
 The demo instructions say that **Start for real** discards demo changes. The `demo-isolation` claim test proves mutation, exit disposal, pristine re-entry, reset, and separation from real data.
 
