@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { PDFDocument } from 'pdf-lib';
+import { readFileSync } from 'node:fs';
 
 test('@claim:demo-sample opens a realistic sample circle in one click', async ({ page }) => {
   await page.goto('/');
@@ -113,6 +114,8 @@ test('@claim:json-import replaces a real circle from a valid export without chan
   const exported = await downloadEvent;
   const exportPath = await exported.path();
   expect(exportPath).toBeTruthy();
+  const exportBuffer = readFileSync(exportPath!);
+  expect(JSON.parse(exportBuffer.toString('utf8')).title).toBe('A hexagon has six corners');
 
   await page.getByRole('button', { name: 'Start for real' }).click();
   await page.getByRole('button', { name: 'Create a circle' }).click();
@@ -120,16 +123,15 @@ test('@claim:json-import replaces a real circle from a valid export without chan
   await page.getByLabel('Problem prompt').fill('This circle should be replaced.');
   await page.getByLabel(/permission/).check();
   await page.getByRole('button', { name: 'Save problem' }).click();
+  await expect(page.getByText('Problem saved on this device.')).toBeVisible();
 
-  let replacementMessage = '';
-  await Promise.all([
-    page.waitForEvent('dialog').then(async dialog => {
-      replacementMessage = dialog.message();
-      await dialog.accept();
-    }),
-    page.locator('#import-input').setInputFiles(exportPath!)
-  ]);
-  expect(replacementMessage).toContain('Replace “Circle to replace” with “A hexagon has six corners”?');
+  await page.locator('#import-input').setInputFiles({ name: 'hexagon-circle.json', mimeType: 'application/json', buffer: exportBuffer });
+  const importPreview = page.getByRole('dialog', { name: 'Replace the current circle?' });
+  await expect(importPreview).toContainText('“Circle to replace” will be replaced with “A hexagon has six corners”.');
+  await expect(importPreview.getByRole('button', { name: 'Cancel import' })).toBeFocused();
+  const previewAxe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(previewAxe.violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
+  await importPreview.getByRole('button', { name: 'Replace circle' }).click();
   await expect(page.getByText('Imported circle saved on this device.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
 

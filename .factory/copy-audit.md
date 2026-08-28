@@ -76,6 +76,17 @@ Audited 28 August 2026. Counts use whitespace-delimited words. No visitor-facing
 
 The remaining ceramic language describes the original artwork and physical shape treatment. It is not used for instructions, headings, or required actions.
 
+## Import preview
+
+| Copy unit | Words | Result |
+| --- | ---: | --- |
+| Import preview | 2 | Context label |
+| Replace the current circle? | 4 | Direct confirmation heading |
+| “Current circle” will be replaced with “Imported circle”. | 8 | Names the destructive result |
+| Export the current circle first if you want to keep it. | 10 | Recovery instruction |
+| Cancel import | 2 | Safe action |
+| Replace circle | 2 | Destructive action |
+
 ## README
 
 Every visitor-facing README sentence is 20 words or fewer. The former untestable outcome promise is gone. Its replacement, `Keep up to six approaches visible during one discussion.`, is covered by `six-approaches`.

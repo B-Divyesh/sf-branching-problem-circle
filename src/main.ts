@@ -16,6 +16,8 @@ let editingBranchId: string | null = null;
 let showTemplates = false;
 let installPrompt: BeforeInstallPromptEvent | null = null;
 let templateOpener: HTMLElement | null = null;
+let importOpener: HTMLElement | null = null;
+let pendingImport: CircleSession | null = null;
 let routeFocus = false;
 
 const isDemo = (): boolean => location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
@@ -63,6 +65,13 @@ function restoreTemplateFocus(): void {
   requestAnimationFrame(() => {
     const replacement = document.querySelector<HTMLElement>('[data-action="templates"]');
     (replacement ?? templateOpener)?.focus();
+  });
+}
+
+function restoreImportFocus(): void {
+  requestAnimationFrame(() => {
+    const replacement = document.querySelector<HTMLElement>('[data-action="import"]');
+    (replacement ?? importOpener)?.focus();
   });
 }
 
@@ -249,6 +258,16 @@ function templateDialog(): string {
   </dialog>`;
 }
 
+function importDialog(imported: CircleSession): string {
+  return `<dialog id="import-dialog" class="confirm-dialog" aria-labelledby="import-dialog-title">
+    <p class="eyebrow">Import preview</p>
+    <h2 id="import-dialog-title">Replace the current circle?</h2>
+    <p><strong>“${esc(circle?.title || 'Untitled circle')}”</strong> will be replaced with <strong>“${esc(imported.title || 'Untitled circle')}”</strong>.</p>
+    <p>Export the current circle first if you want to keep it.</p>
+    <div class="dialog-actions"><button class="secondary-button" data-action="cancel-import">Cancel import</button><button class="primary-button" data-action="confirm-import">Replace circle</button></div>
+  </dialog>`;
+}
+
 function render(): void {
   if (loading) {
     app.innerHTML = `<main id="main" class="loading-piece" aria-live="polite"><div class="loading-tile"></div><h1>Loading your circle</h1></main>`;
@@ -256,10 +275,10 @@ function render(): void {
   }
   const status = `<div class="route-status visually-hidden" aria-live="polite">${esc(document.title)}</div><div class="toast-region" aria-live="polite" aria-atomic="true">${error ? `<div class="toast error">${esc(error)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : notice ? `<div class="toast">${esc(notice)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : ''}</div>`;
   const demoBanner = isDemo() ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span><button class="text-button" data-action="reset-demo">Reset demo</button><button class="text-button" data-action="start-real">Start for real</button></span></aside>` : '';
-  if (!circle) app.innerHTML = `${renderWelcome()}${status}${showTemplates ? templateDialog() : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
+  if (!circle) app.innerHTML = `${renderWelcome()}${status}${showTemplates ? templateDialog() : ''}${pendingImport ? importDialog(pendingImport) : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
   else {
     const phaseContent = circle.phase === 'shape' ? renderShape(circle) : circle.phase === 'vote' ? renderVote(circle) : circle.phase === 'explore' ? renderExplore(circle) : renderRecap(circle);
-    app.innerHTML = `${demoBanner}${appHeader(circle)}${phaseContent}${footer()}${status}${showTemplates ? templateDialog() : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
+    app.innerHTML = `${demoBanner}${appHeader(circle)}${phaseContent}${footer()}${status}${showTemplates ? templateDialog() : ''}${pendingImport ? importDialog(pendingImport) : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
   }
   if (showTemplates) {
     const dialog = document.querySelector<HTMLDialogElement>('#template-dialog');
@@ -269,6 +288,16 @@ function render(): void {
       showTemplates = false;
       render();
       restoreTemplateFocus();
+    }, { once: true });
+  }
+  if (pendingImport) {
+    const dialog = document.querySelector<HTMLDialogElement>('#import-dialog');
+    dialog?.showModal();
+    dialog?.addEventListener('cancel', event => {
+      event.preventDefault();
+      pendingImport = null;
+      render();
+      restoreImportFocus();
     }, { once: true });
   }
   if (routeFocus) {
@@ -340,7 +369,14 @@ app.addEventListener('click', event => {
     if (branch) { if (action === 'toggle-hint') branch.hintRevealed = !branch.hintRevealed; else branch.pathRevealed = !branch.pathRevealed; void persist(); }
   }
   if (action === 'export') downloadData();
-  if (action === 'import') document.querySelector<HTMLInputElement>('#import-input')?.click();
+  if (action === 'import') { importOpener = target; document.querySelector<HTMLInputElement>('#import-input')?.click(); }
+  if (action === 'cancel-import') { pendingImport = null; render(); restoreImportFocus(); }
+  if (action === 'confirm-import' && pendingImport) {
+    circle = pendingImport;
+    pendingImport = null;
+    navigate(`/circle/${circle.phase}${isDemo() ? '?demo=1' : ''}`, false);
+    void persist('Imported circle saved on this device.');
+  }
   if (action === 'clear-circle' && circle && confirm(`Clear “${circle.title || 'this circle'}” and all of its anonymous votes from this device? Export first if you want to keep it.`)) {
     const clearedTitle = circle.title || 'The circle';
     circle = undefined;
@@ -400,10 +436,12 @@ app.addEventListener('change', event => {
   reader.onload = () => {
     try {
       const imported = validateImport(JSON.parse(String(reader.result)));
-      if (circle && !confirm(`Replace “${circle.title || 'your current circle'}” with “${imported.title || 'the imported circle'}”?`)) return;
-      circle = imported;
-      navigate(`/circle/${imported.phase}${isDemo() ? '?demo=1' : ''}`, false);
-      void persist('Imported circle saved on this device.');
+      if (circle) { pendingImport = imported; render(); }
+      else {
+        circle = imported;
+        navigate(`/circle/${imported.phase}${isDemo() ? '?demo=1' : ''}`, false);
+        void persist('Imported circle saved on this device.');
+      }
     } catch { error = 'This file is not a valid circle export. Choose a JSON file exported by Branching Problem Circle.'; render(); }
   };
   reader.onerror = () => { error = 'That file could not be read. Try exporting it again.'; render(); };

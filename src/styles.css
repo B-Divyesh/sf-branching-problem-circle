@@ -38,7 +38,7 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .icon { width: 24px; height: 24px; flex: none; }
 
 .masthead { width: min(1180px, calc(100% - 48px)); margin: 0 auto; display: flex; align-items: center; min-height: 88px; gap: 20px; }
-.wordmark { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 0; color: var(--ink); font-family: Georgia, serif; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.wordmark { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-width: 44px; min-height: 44px; padding: 4px 0; color: var(--ink); font-family: Georgia, serif; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .wordmark .icon { color: var(--cobalt); }
 .welcome-head { justify-content: space-between; }
 .site-nav { display: flex; align-items: center; gap: 8px; }
@@ -198,7 +198,7 @@ input:hover, textarea:hover { border-color: #667773; }
 .print-credit { display: none; }
 
 .template-dialog { width: min(860px, calc(100% - 32px)); max-height: calc(100vh - 32px); padding: clamp(22px, 4vw, 40px); border: 1px solid #9eaaa5; border-radius: 28px 18px 30px 20px; background: var(--ice); color: var(--ink); box-shadow: 0 32px 90px rgba(20,40,39,.28); }
-.template-dialog::backdrop { background: rgba(23,38,37,.45); backdrop-filter: blur(3px); }
+.template-dialog::backdrop, .confirm-dialog::backdrop { background: rgba(23,38,37,.45); backdrop-filter: blur(3px); }
 .dialog-head { display: flex; justify-content: space-between; gap: 20px; }
 .dialog-head h2 { margin-bottom: 8px; }
 .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 24px 0; }
@@ -212,6 +212,10 @@ input:hover, textarea:hover { border-color: #667773; }
 .unlock-panel h3, .unlock-panel p { margin-bottom: 4px; }
 .dialog-legal { font-size: .85rem; text-align: right; margin: 16px 0 0; }
 .dialog-legal a, .legal-page a[href^="mailto:"] { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 4px; }
+.confirm-dialog { width: min(560px, calc(100% - 32px)); padding: clamp(24px, 5vw, 40px); border: 1px solid #9eaaa5; border-radius: 26px 18px 28px 19px; background: var(--ice); color: var(--ink); box-shadow: 0 32px 90px rgba(20,40,39,.28); }
+.confirm-dialog h2 { margin-bottom: 20px; }
+.confirm-dialog p { color: var(--moraine); }
+.dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
 .toast-region { position: fixed; z-index: 200; inset: auto 20px calc(20px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
 .toast { display: flex; align-items: center; gap: 14px; max-width: 550px; padding: 12px 12px 12px 18px; background: var(--ink); color: white; border-radius: 14px; box-shadow: var(--shadow); pointer-events: auto; }
