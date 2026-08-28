@@ -16,7 +16,7 @@ Candidate repaired from `c7a44266186f3fdbb3486c9f0248f90dd2fee972`; adversarial 
 | F-1-10 | Replaced JSON parser detail with actionable import recovery text. | Import regression test |
 | F-1-11 | Added immutable cache policy for hashed assets. | `deploy-config.test.ts` |
 | F-1-12 | Added CSP, frame protection, referrer, permissions, and nosniff headers. | `deploy-config.test.ts` |
-| F-1-13 | Configured manifest MIME as `application/manifest+json`. | `deploy-config.test.ts`; local header check |
+| F-1-13 | Rewrote the legacy manifest URL to JSON and linked the JSON manifest. | `deploy-config.test.ts`; live JSON MIME check |
 | F-1-14 | Added route titles, descriptions, canonicals, OG/Twitter tags, SVG favicon, Apple icon, and social image. | Route/title browser test; local smoke |
 | F-1-15 | Added History API phase URLs, popstate restore, route announcement, and heading focus. | Route/title browser test |
 | F-1-16 | Added sample preview, three-step explanation, limits/privacy, and templates section. | Landing smoke screenshot |
