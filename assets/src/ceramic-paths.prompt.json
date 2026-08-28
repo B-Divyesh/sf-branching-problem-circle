@@ -1,0 +1,7 @@
+{
+  "generator": "Azure OpenAI factory-image via /opt/fleet/lib/gen-image.sh",
+  "date": "2026-08-28",
+  "size": "1536x1024",
+  "quality": "high",
+  "prompt": "Use case: stylized-concept. Asset type: responsive landing-page hero illustration. Primary request: an overhead still life of a collaborative math thinking circle expressed as handmade porcelain tiles; one central completely blank ivory tile with three gently branching chains of smaller irregular completely blank tiles, and six small rounded river stones gathered near different paths. Scene: pale glacial stone tabletop. Style: tactile editorial ceramic photography, restrained and believable, slight handmade imperfections. Composition: landscape, centered object cluster, clean negative space around edges, no crop of the arrangement. Lighting: diffuse arctic morning light, soft short shadows, calm and curious. Palette: chalk white, celadon ice, blue-grey, sparing deep cobalt glaze, charcoal. Materials: matte unglazed porcelain, subtle glaze pools, fine stone grain. Constraints: no people, no hands, no writing, no numerals, no mathematical symbols, no UI, no logos, no watermark. Avoid: generic 3D blobs, glossy plastic, gradients, school clichés, chess pieces, busy props."
+}
