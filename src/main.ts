@@ -87,6 +87,7 @@ function appHeader(current: CircleSession): string {
       <button class="quiet-button" data-action="templates">Templates</button>
       <button class="quiet-button" data-action="export">Export data</button>
       <button class="quiet-button" data-action="import">Import</button>
+      <button class="quiet-button danger-text" data-action="clear-circle">Clear circle</button>
     </div>
     <nav class="phase-nav" aria-label="Session phases">
       <div role="tablist" aria-label="Session phases">
@@ -136,7 +137,7 @@ function renderBranchEditor(branch: Branch, isNew: boolean): string {
 function renderVote(current: CircleSession): string {
   const ready = current.title && current.problem && current.branches.length;
   return `<main id="main" class="vote-stage">
-    ${ready ? `<section class="vote-problem"><p class="room-chip">Circle ${esc(current.roomCode)} · anonymous turn</p><h1>${esc(current.title)}</h1><p>${esc(current.problem)}</p></section>
+    ${ready ? `<section class="vote-problem"><p class="room-chip">Shared-device turn · anonymous</p><h1>${esc(current.title)}</h1><p>${esc(current.problem)}</p></section>
       <form id="vote-form" class="vote-form">
         <fieldset><legend>Which path would you try first?</legend><p class="field-help">There is no fastest-path prize. Pick what feels promising.</p>
           <div class="vote-grid">${current.branches.map((branch, index) => `<label class="vote-tile"><input type="radio" name="branch" value="${branch.id}" /><span class="tile-index">${String(index + 1).padStart(2, '0')}</span><strong>${esc(branch.title)}</strong><small>${esc(branch.firstStep || 'Try this direction and decide the first move together.')}</small><span class="choose-mark">Choose this path</span></label>`).join('')}</div>
@@ -260,6 +261,12 @@ app.addEventListener('click', event => {
   }
   if (action === 'export') downloadData();
   if (action === 'import') document.querySelector<HTMLInputElement>('#import-input')?.click();
+  if (action === 'clear-circle' && circle && confirm(`Clear “${circle.title || 'this circle'}” and all of its anonymous votes from this device? Export first if you want to keep it.`)) {
+    const clearedTitle = circle.title || 'The circle';
+    circle = undefined;
+    editingBranchId = null;
+    void clearCircle().then(() => { notice = `${clearedTitle} was cleared from this device.`; render(); }).catch(() => { error = 'The circle could not be cleared. Try again.'; render(); });
+  }
   if (action === 'print') window.print();
   if (action === 'install' && installPrompt) { void installPrompt.prompt().then(() => { installPrompt = null; render(); }); }
   if (action === 'forget-license') { forgetLicense(); licenseState = 'free'; render(); }
