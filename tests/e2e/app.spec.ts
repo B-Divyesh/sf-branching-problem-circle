@@ -167,12 +167,16 @@ test('keeps keyboard focus for phase tabs and template dialog', async ({ page })
 
 test('has accessible pages and 44px mobile links', async ({ page }) => {
   await page.goto('/');
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  let results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
   for (const link of [page.getByRole('link', { name: 'Branching Problem Circle' }), page.getByRole('link', { name: 'Privacy' }).first(), page.getByRole('link', { name: 'Terms' })]) {
     const box = await link.boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
   }
+  await page.goto('/demo');
+  await page.getByRole('tab', { name: /Recap/ }).click();
+  results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(results.violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
 });
 
 test('uses route titles, deep links, and a real 404 page', async ({ page }) => {

@@ -235,7 +235,7 @@ function renderRecap(current: CircleSession): string {
       ${current.branches.length ? `<ol>${current.branches.map(branch => `<li><header><h3>${esc(branch.title)}</h3><span>${branch.votes} ${branch.votes === 1 ? 'vote' : 'votes'}</span></header><p>${esc(branch.path || branch.firstStep || 'No note added.')}</p>${branch.rationales.length ? `<ul>${branch.rationales.map(r => `<li>“${esc(r.text)}”</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>` : '<p>No approaches were recorded.</p>'}
     </section>
     ${current.alternativeIdeas.length ? `<section class="recap-alternatives"><h2>Other paths proposed</h2><ul>${current.alternativeIdeas.map(r => `<li>${esc(r.text)}</li>`).join('')}</ul></section>` : ''}
-    <section class="reflection"><h2>Carry one question forward</h2><div class="reflection-line" aria-label="Blank line for a handwritten reflection"></div></section>
+    <section class="reflection"><h2>Carry one question forward</h2><div class="reflection-line" aria-hidden="true"></div></section>
     <p class="print-credit">Made locally with Branching Problem Circle · no participant accounts</p>
   </main>`;
 }
