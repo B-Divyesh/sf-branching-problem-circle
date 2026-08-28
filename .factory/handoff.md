@@ -1,64 +1,35 @@
-# Branching Problem Circle — build handoff
+# Review 1 handoff — Branching Problem Circle
 
-## Independent verification — FAIL (2026-08-28)
+## Outcome
 
-Candidate `c7a44266186f3fdbb3486c9f0248f90dd2fee972` was independently tested from a clean checkout and against `https://branching-problem-circle.sociobot.in`. The live deployment is present and all 18 production files byte-match the fresh candidate build, so the earlier general deployment concern is resolved.
+Adversarial first-read review 1 is complete. Verdict: **FAIL**.
 
-Release acceptance is **FAIL**:
+The full report is in `.factory/review-1.md`. Product code was not modified. The review records 13 blocking findings and 23 additional findings, including the absent/unsafe demo, missing claims registry, dead checkout, broken routing, first-screen copy failure, structure/metadata gaps, and every unresolved defect from the previous handoff.
 
-- **High:** the advertised US $12 template-pack checkout returns HTTP `404` with `{"error":"enabled factory product","status":404}`; paid templates cannot be purchased.
-- **Medium:** ArrowRight from the focused Collect tab activates Explore but drops focus to `BODY`; closing the template dialog also fails to return focus to its opener.
-- **Medium:** at 390 px, the wordmark is `164×35` and the Privacy/Terms links are `49×15` and `40×15`, below the required 44×44 targets.
-- **Medium:** a problem saves and persists with `rightsConfirmed: false`; the rights acknowledgement is not required.
-- **Low:** malformed-import copy exposes a JSON parser diagnostic; hashed assets receive only `max-age=30`; CSP/frame/permissions policies are absent; the web manifest is served as `application/octet-stream`.
+## Verification performed
 
-Fresh gates: `npm ci` PASS, `npm test` 3/3 PASS, `npm run build` PASS, `npm run test:e2e` 6/6 PASS, audit 0 vulnerabilities, axe serious/critical 0, console/page errors 0. Lighthouse mobile: performance 99, accessibility 100, best practices 100, SEO 100; FCP 1.0 s, LCP 1.3 s, TBT 110 ms, CLS 0. Offline reload, persisted data, precached legal page, installability, and a controlled service-worker update all passed. Full evidence and reproduction steps are in `.factory/verification.md`.
+- Opened the live site cold at 390×844 and 1440×900 and captured the visible first-screen copy.
+- Opened `/demo`, checked for sample state/banner/reset/start controls, and proved a record saved there appears at `/` through the shared `branching-problem-circle` IndexedDB database.
+- Read `.factory/brief.json`, `.factory/design.md`, the prior handoff, and `.factory/verification.md`; no earlier review or polish files exist.
+- Audited every landing-page and README copy unit with word counts and proposed rewrites for every flag.
+- Confirmed `.factory/claims.json` and `@claim:` tests are absent; inventoried all unlisted claim-like copy.
+- Reproduced every previous defect live and in code: dead paid checkout, phase/dialog focus loss, undersized mobile targets, optional rights acknowledgement, raw import error, short asset cache, missing security headers, and manifest MIME.
+- Audited `/`, `/demo`, `/privacy/`, `/terms/`, and an unknown route for titles, h1, metadata, header/footer, links, and 404 behavior.
+- Confirmed live offline reload and same-origin requests during an ordinary create/save flow. The required demo privacy trace cannot pass because demo mode does not exist.
+- Ran accessibility and basic live smoke checks; no axe, console, missing-alt, or unlabeled-button errors were found.
 
-## Shipped
-
-Finished v1 of the local-first facilitator tool described in `.factory/brief.json`:
-
-- One editable, rights-acknowledged problem with up to six approach tiles.
-- Separate participant-facing collection phase for anonymous votes, written rationales, and alternative paths.
-- Facilitator-controlled hint and full-path reveals, vote totals, and preserved written thinking.
-- Compact screen recap plus an A4 one-page print/save-PDF treatment; JSON export/import keeps full-fidelity data in the facilitator’s hands.
-- IndexedDB persistence, online/offline state, install prompt, manifest (192/512/maskable icons), versioned service-worker caching, offline fallback, and update notice.
-- Responsive 390px treatment, keyboard tab/arrow navigation, visible focus, semantic landmarks/forms, reduced-motion fallback, and non-color state labels.
-- Welcome, empty, loading, storage error, invalid import, offline, and destructive confirmation states.
-- `/privacy/` and `/terms/` pages.
-- Optional US $12 one-time facilitator template pack using the Sociobot checkout/verify contract. License return capture, daily cached verification, offline optimistic unlock, revoked/invalid state, and paste-to-restore are included. Core circles, accessibility, voting, and exports are never gated.
-- Original glacial-ceramic hero generated for this product, manually reviewed for unwanted text/symbols/brands and visual consistency, then shipped as responsive 34 KB/100 KB WebP plus a 185 KB JPEG fallback. Full prompt provenance is in `.factory/design.md` and `assets/src/`.
-
-## Run and verify
+## Commands run
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
 npm run test:e2e
-npm run preview
+/opt/fleet/lib/verify-url.sh https://branching-problem-circle.sociobot.in <temporary-evidence-directory>
 ```
 
-The required build command is exactly `npm run build`. It type-checks and writes `dist/`; `dist/index.html` is at the deploy root.
+Results: 3/3 unit tests passed, the production build completed and wrote `dist/`, 6/6 Playwright tests passed, the live basic verifier passed, and a live axe WCAG A/AA scan found zero violations. These do not satisfy the missing claims/demo contracts.
 
-Verification completed 2026-08-28:
+## Work remaining
 
-- `npm test`: 3/3 unit tests passed.
-- `npm run test:e2e`: 6/6 Playwright tests passed across desktop Chromium and a 390×844 Chromium touch viewport. This covers a complete author → vote → reveal → recap session, an axe WCAG 2 A/AA scan, and explicit `context.setOffline(true)` reload.
-- `/opt/fleet/lib/verify-url.sh`: HTTP 200, title present, `lang="en"`, exactly one `h1`, main landmark present, zero missing image alts, zero unlabeled buttons, and zero page/console errors. Observed local load: 623 ms.
-- Lighthouse 12.8.2, mobile defaults against the production build: performance **100**, accessibility **100**, best practices **100**, SEO **100**; FCP **0.9 s**, LCP **1.5 s**, TBT **0 ms**, CLS **0**, interactive **1.5 s**.
-- Production payload: initial app JavaScript **27.8 KB** (9.7 KB gzip), CSS **19.6 KB** (5.4 KB gzip), mobile hero WebP **33.8 KB**. All are below the 200/50/300 KB budgets.
-- `npm audit --audit-level=high`: zero vulnerabilities.
-
-## Product/privacy notes
-
-Circle content never leaves IndexedDB. The only runtime third-party request is an explicit or background license verification to `api.sociobot.in`; checkout opens the hosted Sociobot/Dodo flow. There are no analytics, CDN scripts, remote fonts, child accounts, public sharing, or AI solution calls.
-
-Votes are intentionally collected on the facilitator’s shared device. The internal room code is not exposed as a join code because v1 has no network room and should not imply public sharing.
-
-## Known gaps and factory next steps
-
-- The factory still needs to register the paid product/return URL and exercise a live test checkout before release. The app uses the contract slug, not a hardcoded product ID.
-- The worker image lacked an AVIF encoder. The required optimized WebP is present (34 KB mobile), with a JPEG fallback; this has no material budget impact.
-- Local browser storage can be cleared by browser/OS policy. The UI explains this and provides JSON export; there is intentionally no cloud sync.
-- Install availability depends on browser PWA support and HTTPS in production.
+Fix all findings in `.factory/review-1.md`, beginning with the plain first screen, isolated seeded demo, claims registry/tests, paid checkout, routing/404, and prior accessibility/data-contract regressions. Then deploy and repeat the full review from clean browser contexts. No product repair was authorized in this work order.
