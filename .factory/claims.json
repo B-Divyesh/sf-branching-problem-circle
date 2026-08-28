@@ -2,16 +2,16 @@
   {
     "id": "demo-sample",
     "claim": "Try it with sample data opens a sample circle with approaches, votes, and reveals.",
-    "where": "landing primary action, /demo, README",
+    "where": "landing primary action, /?demo=1, /demo, README",
     "test": "npm run test:e2e -- --grep @claim:demo-sample",
-    "sandbox": "fresh browser context at /demo"
+    "sandbox": "fresh browser context at /?demo=1"
   },
   {
     "id": "demo-isolation",
-    "claim": "Demo sample data is not saved to a real circle.",
+    "claim": "Demo changes are discarded on exit and never copied to a real circle.",
     "where": "demo banner, README, .factory/demo.md",
     "test": "npm run test:e2e -- --grep @claim:demo-isolation",
-    "sandbox": "fresh browser context: enter /demo, leave for /, create a circle"
+    "sandbox": "fresh /?demo=1 context: mutate, exit, inspect both databases, re-enter for a pristine seed, reset, then create a blank real circle"
   },
   {
     "id": "browser-only",
@@ -37,7 +37,7 @@
   {
     "id": "six-approaches",
     "claim": "A circle holds up to six approaches.",
-    "where": "landing fact, README",
+    "where": "landing fact, How it works, README introduction and feature list",
     "test": "npm run test:e2e -- --grep @claim:six-approaches",
     "sandbox": "fresh context; create six approaches and assert add control disabled"
   },

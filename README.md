@@ -2,7 +2,7 @@
 
 Branching Problem Circle helps volunteer math-circle leaders compare several approaches to one problem.
 
-Keep starts, failed approaches, votes, hints, and solutions in one circle. Lead a discussion without reducing it to one answer.
+Keep starts, failed approaches, votes, hints, and solutions in one circle. Keep up to six approaches visible during one discussion.
 
 It is made for a leader sharing one device with a small group. There are no child accounts, public rooms, rankings, test banks, or generated solutions. Use only problems you have permission to share.
 
@@ -24,7 +24,7 @@ See the [privacy notice](https://branching-problem-circle.sociobot.in/privacy/) 
 
 ## Demo
 
-`/demo` and `/?demo=1` load an original hexagon problem with three approaches, six anonymous votes, a revealed hint, and a recap. The sample is stored separately from your real circles. **Reset demo** restores that sample. **Start for real** returns to your circles without copying demo data.
+`/?demo=1` and `/demo` load an original hexagon problem with three approaches, six anonymous votes, a revealed hint, and a recap. The sample is stored separately from your real circles. **Reset demo** restores that sample. **Start for real** discards demo changes before returning to your circles.
 
 ## Develop
 

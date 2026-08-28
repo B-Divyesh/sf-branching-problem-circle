@@ -51,8 +51,8 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .secondary-button:hover { border-color: var(--cobalt); color: var(--cobalt); }
 .quiet-button { padding: 10px 15px; background: transparent; border: 1px solid transparent; }
 .quiet-button:hover { background: var(--clay); }
-.text-button { padding: 8px 4px; min-height: 44px; background: transparent; color: var(--cobalt); text-decoration: underline; text-underline-offset: 3px; }
-.icon-button { width: 44px; padding: 0; background: var(--clay); font-size: 1.8rem; font-weight: 400; }
+.text-button { padding: 8px 4px; min-width: 44px; min-height: 44px; background: transparent; color: var(--cobalt); text-decoration: underline; text-underline-offset: 3px; }
+.icon-button { width: 44px; height: 44px; flex: 0 0 44px; padding: 0; background: var(--clay); font-size: 1.8rem; font-weight: 400; }
 .link-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .danger-text { color: var(--oxide); }
 .eyebrow { color: var(--cobalt); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; }
@@ -211,6 +211,7 @@ input:hover, textarea:hover { border-color: #667773; }
 .unlock-panel > div > .icon { float: left; margin-right: 10px; color: var(--cobalt); }
 .unlock-panel h3, .unlock-panel p { margin-bottom: 4px; }
 .dialog-legal { font-size: .85rem; text-align: right; margin: 16px 0 0; }
+.dialog-legal a, .legal-page a[href^="mailto:"] { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 4px; }
 
 .toast-region { position: fixed; z-index: 200; inset: auto 20px calc(20px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
 .toast { display: flex; align-items: center; gap: 14px; max-width: 550px; padding: 12px 12px 12px 18px; background: var(--ink); color: white; border-radius: 14px; box-shadow: var(--shadow); pointer-events: auto; }

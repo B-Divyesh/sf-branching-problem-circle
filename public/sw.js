@@ -1,4 +1,4 @@
-const VERSION = 'bpc-v3';
+const VERSION = 'bpc-v4';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 const PRECACHE = [

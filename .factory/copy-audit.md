@@ -1,6 +1,6 @@
-# Copy audit — polish round 2
+# Copy audit — polish round 3
 
-Audited 28 August 2026. Counts use whitespace-delimited words. No landing or README copy unit exceeds 22 words or uses a banned marketing word.
+Audited 28 August 2026. Counts use whitespace-delimited words. No visitor-facing sentence exceeds 22 words or uses a banned marketing word.
 
 ## Landing page
 
@@ -13,24 +13,24 @@ Audited 28 August 2026. Counts use whitespace-delimited words. No landing or REA
 | Privacy | 1 | Navigation |
 | For volunteer leaders of small math circles | 7 | Audience |
 | Compare several approaches to one math problem | 7 | H1: concrete job |
-| Collect anonymous votes on several approaches, then reveal hints during the discussion. | 11 | Product outcome; `demo-sample` |
+| Collect anonymous votes on several approaches, then reveal hints during the discussion. | 12 | Product outcome; `demo-sample` |
 | Try it with sample data | 5 | Primary action |
 | Opens a sample circle; nothing is saved. | 7 | Demo outcome; `demo-isolation` |
 | Create a circle | 3 | Real-data action |
 | Import a circle | 3 | Import action; `json-import` |
 | Circle data stays in this browser | 6 | Privacy fact; `browser-only` |
-| Up to six approaches, including dead ends | 6 | Product limit; `six-approaches` |
+| Up to six approaches, including dead ends | 7 | Product limit; `six-approaches` |
 | One-page printable recap | 3 | Print result; `recap-export` |
 | Blank handmade ceramic tiles branch three ways around a central tile, with six river stones marking choices. | 17 | Image alternative |
 | The illustration shows one problem branching into three approaches. | 9 | Image caption |
 | See the circle in use | 5 | Preview label |
 | One problem, three approaches, a shared discussion | 7 | Preview heading |
-| Open the sample to inspect votes, hints, and a printable recap before making your own circle. | 16 | Preview explanation; demo claims |
+| Open the sample to inspect votes, hints, and a printable recap before making your own circle. | 15 | Preview explanation; demo and recap claims |
 | Open the sample circle | 4 | Preview action |
 | Write a problem. | 3 | Step one |
 | Confirm you can use it with your group. | 8 | Rights instruction |
 | Add approaches. | 2 | Step two |
-| Keep up to six possible starts visible. | 7 | Limit; `six-approaches` |
+| Keep up to six possible starts visible. | 7 | Product limit; `six-approaches` |
 | Reveal and recap. | 3 | Step three |
 | Collect votes, open hints, then print or export. | 8 | Workflow; demo and recap claims |
 | Limits and privacy | 3 | Section label |
@@ -39,9 +39,9 @@ Audited 28 August 2026. Counts use whitespace-delimited words. No landing or REA
 | Circle data stays in your browser. | 6 | Privacy; `browser-only` |
 | Templates | 1 | Section label |
 | Starter templates are included | 4 | Availability; `included-templates` |
-| Authoring, voting, printing, and export are free. | 6 | Availability; `included-templates` |
+| Authoring, voting, printing, and export are free. | 7 | Availability; `included-templates` |
 | Browse templates | 2 | Template action |
-| reloads offline after your first visit. | 6 | Offline; `offline-reload` |
+| Circle data stays in this browser · reloads offline after your first visit. | 12 | `browser-only`, `offline-reload` |
 | Terms | 1 | Legal link |
 | Built by Param Factory | 4 | Provenance |
 
@@ -52,7 +52,7 @@ Audited 28 August 2026. Counts use whitespace-delimited words. No landing or REA
 | Templates | 1 | Plain section label |
 | Choose a session template | 4 | Plain heading |
 | These starter templates are included. | 5 | `included-templates` |
-| They replace the current circle only after you confirm. | 8 | Destructive-action warning |
+| They replace the current circle only after you confirm. | 9 | Destructive-action warning |
 | Blank circle | 2 | Template name |
 | Start with an empty problem and add approaches as they emerge. | 10 | Template description |
 | Compare three approaches | 3 | Template name |
@@ -65,22 +65,40 @@ Audited 28 August 2026. Counts use whitespace-delimited words. No landing or REA
 | Move from examples through a conjecture to an explanation. | 9 | Template description |
 | Use template | 2 | Repeated action label |
 
+## Corrected workflow headings
+
+| State | Heading | Words |
+| --- | --- | ---: |
+| Approach list | Approaches | 1 |
+| New approach editor | Add an approach | 3 |
+| Voting unavailable | Add a problem and approach before collecting votes | 8 |
+| Recap reflection | Question for the next session | 5 |
+
+The remaining ceramic language describes the original artwork and physical shape treatment. It is not used for instructions, headings, or required actions.
+
 ## README
 
-All visitor-facing README sentences are 20 words or fewer. `IndexedDB`, database identifiers, billing terms, and other implementation details appear only in developer or factory verification documents. The longest visitor sentence is the 20-word demo description.
+Every visitor-facing README sentence is 20 words or fewer. The former untestable outcome promise is gone. Its replacement, `Keep up to six approaches visible during one discussion.`, is covered by `six-approaches`.
+
+The demo instructions say that **Start for real** discards demo changes. The `demo-isolation` claim test proves mutation, exit disposal, pristine re-entry, reset, and separation from real data.
+
+## Legal and recovery pages
+
+Privacy, terms, offline, and 404 copy was checked sentence by sentence. Each sentence is 22 words or fewer. The 404 heading is the direct `This page does not exist`; legal storage and product-limit statements map to `browser-only`, `json-import`, `included-templates`, and `no-public-sharing`.
 
 ## Catalog description
 
-`Compare approaches, collect anonymous votes, and reveal hints in an offline math circle.` — 12 words, 88 characters, verb first.
+`Compare math approaches, collect anonymous votes, and reveal hints on one shared device.` — 13 words, 88 characters, verb first.
 
 ## Terminology
 
-| Concept | One term used in visitor copy |
+| Concept | One visitor-facing term |
 | --- | --- |
-| saved session | circle |
-| prompt | problem |
-| proposed method | approach |
-| anonymous choice | vote |
-| facilitator reveal | hint |
-| printable/exported summary | recap |
-| isolated sample state | demo |
+| Saved session | circle |
+| Prompt | problem |
+| Proposed method | approach |
+| Anonymous choice | vote |
+| Partial facilitator reveal | hint |
+| Full facilitator reveal | note |
+| Printable/exported summary | recap |
+| Isolated sample state | demo |

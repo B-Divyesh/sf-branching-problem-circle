@@ -29,7 +29,7 @@ function setMetadata(): void {
   const site = 'https://branching-problem-circle.sociobot.in';
   const phase = routePhase();
   const phaseTitle: Record<Phase, string> = {
-    shape: 'Shape a circle', vote: 'Collect votes', explore: 'Explore approaches', recap: 'Circle recap'
+    shape: 'Write a problem', vote: 'Collect votes', explore: 'Explore approaches', recap: 'Circle recap'
   };
   const title = isDemo() ? 'Demo — Branching Problem Circle'
     : phase ? `${phaseTitle[phase]} — Branching Problem Circle`
@@ -78,7 +78,7 @@ const esc = (value: unknown): string => String(value ?? '')
 function footer(): string {
   return `<footer class="site-footer">
     <span>Circle data stays in this browser · reloads offline after your first visit.</span>
-    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.2.0</span>
+    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.3.0</span>
   </footer>`;
 }
 
@@ -107,7 +107,7 @@ function renderWelcome(): string {
         <h1>Compare several approaches to one math problem</h1>
         <p class="lede">Collect anonymous votes on several approaches, then reveal hints during the discussion.</p>
         <div class="welcome-actions">
-          <a class="primary-button link-button" href="/demo">Try it with sample data</a><span class="action-help">Opens a sample circle; nothing is saved.</span>
+          <a class="primary-button link-button" href="/?demo=1">Try it with sample data</a><span class="action-help">Opens a sample circle; nothing is saved.</span>
           <button class="secondary-button" data-action="new-circle">Create a circle</button>
           <button class="text-button" data-action="import">Import a circle</button>
         </div>
@@ -126,7 +126,7 @@ function renderWelcome(): string {
       </figure>
     </main>
     <section class="landing-details" aria-label="How Branching Problem Circle works">
-      <section class="demo-preview"><p class="eyebrow">See the circle in use</p><h2>One problem, three approaches, a shared discussion</h2><p>Open the sample to inspect votes, hints, and a printable recap before making your own circle.</p><a class="secondary-button link-button" href="/demo">Open the sample circle</a></section>
+      <section class="demo-preview"><p class="eyebrow">See the circle in use</p><h2>One problem, three approaches, a shared discussion</h2><p>Open the sample to inspect votes, hints, and a printable recap before making your own circle.</p><a class="secondary-button link-button" href="/?demo=1">Open the sample circle</a></section>
       <section id="how-it-works"><p class="eyebrow">How it works</p><ol><li><strong>Write a problem.</strong> Confirm you can use it with your group.</li><li><strong>Add approaches.</strong> Keep up to six possible starts visible.</li><li><strong>Reveal and recap.</strong> Collect votes, open hints, then print or export.</li></ol></section>
       <section><p class="eyebrow">Limits and privacy</p><h2>Built for one shared device</h2><p>No public sharing, child accounts, rankings, test banks, or generated solutions. Circle data stays in your browser.</p></section>
       <section><p class="eyebrow">Templates</p><h2>Starter templates are included</h2><p>Authoring, voting, printing, and export are free.</p><button class="secondary-button" data-action="templates">Browse templates</button></section>
@@ -134,7 +134,7 @@ function renderWelcome(): string {
 }
 
 const phases: { id: Phase; short: string; label: string }[] = [
-  { id: 'shape', short: '1', label: 'Shape' }, { id: 'vote', short: '2', label: 'Collect' },
+  { id: 'shape', short: '1', label: 'Write' }, { id: 'vote', short: '2', label: 'Collect' },
   { id: 'explore', short: '3', label: 'Explore' }, { id: 'recap', short: '4', label: 'Recap' }
 ];
 
@@ -173,7 +173,7 @@ function renderShape(current: CircleSession): string {
       <div class="form-end"><span class="save-note">Saved only in this browser</span><button class="primary-button" type="submit">Save problem</button></div>
     </form>
     <section class="approach-section" aria-labelledby="approach-heading">
-      <div class="section-heading"><div><p class="eyebrow">Approach tiles</p><h2 id="approach-heading">Make room for competing starts.</h2></div><button class="secondary-button" data-action="add-branch" ${current.branches.length >= 6 ? 'disabled' : ''}>Add approach <span>${current.branches.length}/6</span></button></div>
+      <div class="section-heading"><div><p class="eyebrow">Possible methods</p><h2 id="approach-heading">Approaches</h2></div><button class="secondary-button" data-action="add-branch" ${current.branches.length >= 6 ? 'disabled' : ''}>Add approach <span>${current.branches.length}/6</span></button></div>
       ${current.branches.length ? `<ol class="author-branches">${current.branches.map((branch, index) => `<li><span class="branch-number">${String(index + 1).padStart(2, '0')}</span><div><h3>${esc(branch.title)}</h3><p>${esc(branch.firstStep || 'No opening move added yet.')}</p></div><button class="text-button" data-action="edit-branch" data-id="${branch.id}">Edit</button><button class="text-button danger-text" data-action="delete-branch" data-id="${branch.id}">Remove</button></li>`).join('')}</ol>` : `<div class="empty-piece"><span class="empty-mark">+</span><div><h3>No approaches yet</h3><p>Add the first possible method, including one that may fail.</p></div></div>`}
     </section>
     ${editing ? renderBranchEditor(editing, editingBranchId === 'new') : ''}
@@ -182,13 +182,13 @@ function renderShape(current: CircleSession): string {
 
 function renderBranchEditor(branch: Branch, isNew: boolean): string {
   return `<section class="branch-editor" aria-labelledby="branch-editor-heading">
-    <div class="section-heading"><div><p class="eyebrow">${isNew ? 'New tile' : 'Edit tile'}</p><h2 id="branch-editor-heading">${isNew ? 'Name a way in.' : esc(branch.title)}</h2></div><button class="text-button" data-action="cancel-branch">Close</button></div>
+    <div class="section-heading"><div><p class="eyebrow">${isNew ? 'New approach' : 'Edit approach'}</p><h2 id="branch-editor-heading">${isNew ? 'Add an approach' : esc(branch.title)}</h2></div><button class="text-button" data-action="cancel-branch">Close</button></div>
     <form id="branch-form" data-id="${branch.id}">
       <div class="field"><label for="branch-title">Approach name <span>required</span></label><input id="branch-title" name="title" required maxlength="60" value="${esc(branch.title)}" placeholder="e.g. Build a smaller case" /></div>
       <div class="field"><label for="first-step">What participants see first</label><textarea id="first-step" name="firstStep" maxlength="280" rows="2" placeholder="A neutral first move, not the result">${esc(branch.firstStep)}</textarea></div>
       <div class="two-fields">
         <div class="field"><label for="hint">Hint to open later</label><textarea id="hint" name="hint" maxlength="400" rows="3">${esc(branch.hint)}</textarea></div>
-        <div class="field"><label for="path">Full path or facilitator note</label><textarea id="path" name="path" maxlength="1000" rows="3">${esc(branch.path)}</textarea></div>
+        <div class="field"><label for="path">Facilitator note to reveal later</label><textarea id="path" name="path" maxlength="1000" rows="3">${esc(branch.path)}</textarea></div>
       </div>
       <div class="form-end"><span class="save-note">Hints stay hidden until you open them.</span><button class="primary-button" type="submit">${isNew ? 'Add approach' : 'Save approach'}</button></div>
     </form>
@@ -200,42 +200,42 @@ function renderVote(current: CircleSession): string {
   return `<main id="main" class="vote-stage">
     ${ready ? `<section class="vote-problem"><p class="room-chip">Shared-device turn · anonymous</p><h1>${esc(current.title)}</h1><p>${esc(current.problem)}</p></section>
       <form id="vote-form" class="vote-form">
-        <fieldset><legend>Which path would you try first?</legend><p class="field-help">There is no fastest-path prize. Pick what feels promising.</p>
-          <div class="vote-grid">${current.branches.map((branch, index) => `<label class="vote-tile"><input type="radio" name="branch" value="${branch.id}" /><span class="tile-index">${String(index + 1).padStart(2, '0')}</span><strong>${esc(branch.title)}</strong><small>${esc(branch.firstStep || 'Try this direction and decide the first move together.')}</small><span class="choose-mark">Choose this path</span></label>`).join('')}</div>
+        <fieldset><legend>Which approach would you try first?</legend><p class="field-help">There is no prize for speed. Pick what feels promising.</p>
+          <div class="vote-grid">${current.branches.map((branch, index) => `<label class="vote-tile"><input type="radio" name="branch" value="${branch.id}" /><span class="tile-index">${String(index + 1).padStart(2, '0')}</span><strong>${esc(branch.title)}</strong><small>${esc(branch.firstStep || 'Try this approach and decide the first move together.')}</small><span class="choose-mark">Choose this approach</span></label>`).join('')}</div>
         </fieldset>
         <div class="response-fields"><div class="field"><label for="rationale">Why might it work?</label><textarea id="rationale" name="rationale" rows="2" maxlength="320" placeholder="One thought is enough"></textarea></div>
-        <div class="or"><span>or</span></div><div class="field"><label for="alternative">Offer a different path</label><textarea id="alternative" name="alternative" rows="2" maxlength="320" placeholder="What else could the circle try?"></textarea></div></div>
+        <div class="or"><span>or</span></div><div class="field"><label for="alternative">Offer a different approach</label><textarea id="alternative" name="alternative" rows="2" maxlength="320" placeholder="What else could the circle try?"></textarea></div></div>
         <p id="vote-error" class="form-error" role="alert"></p>
         <button class="primary-button large-button" type="submit">Place my idea</button>
-      </form>` : `<section class="not-ready"><p class="eyebrow">Collect ideas</p><h1>The voting table needs a little more clay.</h1><p>Add a title, prompt, and at least one approach before inviting the next thinker.</p><button class="primary-button" data-phase="shape">Return to shaping</button></section>`}
+      </form>` : `<section class="not-ready"><p class="eyebrow">Collect ideas</p><h1>Add a problem and approach before collecting votes</h1><p>Write a title, problem, and at least one approach before passing the device.</p><button class="primary-button" data-phase="shape">Add a problem and approach</button></section>`}
   </main>`;
 }
 
 function renderExplore(current: CircleSession): string {
   return `<main id="main" class="workspace explore-workspace">
-    <section class="work-intro"><div><p class="eyebrow">Explore together</p><h1>${esc(current.title || 'Open the paths slowly.')}</h1></div><p>${totalVotes(current)} anonymous ${totalVotes(current) === 1 ? 'vote' : 'votes'} placed. Counts invite discussion; they do not rank thinkers.</p></section>
-    <div class="problem-ribbon"><span>Problem</span><p>${esc(current.problem || 'Add a problem in Shape.')}</p></div>
-    ${current.branches.length ? `<section class="path-board" aria-label="Approach branches">${current.branches.map((branch, index) => `<article class="path-tile ${branch.pathRevealed ? 'revealed' : ''}">
+    <section class="work-intro"><div><p class="eyebrow">Explore together</p><h1>${esc(current.title || 'Explore the approaches')}</h1></div><p>${totalVotes(current)} anonymous ${totalVotes(current) === 1 ? 'vote' : 'votes'} placed. Counts invite discussion; they do not rank thinkers.</p></section>
+    <div class="problem-ribbon"><span>Problem</span><p>${esc(current.problem || 'Add a problem in Write.')}</p></div>
+    ${current.branches.length ? `<section class="path-board" aria-label="Approaches">${current.branches.map((branch, index) => `<article class="path-tile ${branch.pathRevealed ? 'revealed' : ''}">
       <div class="tile-top"><span class="tile-index">${String(index + 1).padStart(2, '0')}</span><span class="vote-count"><b>${branch.votes}</b> ${branch.votes === 1 ? 'vote' : 'votes'}</span></div>
       <h2>${esc(branch.title)}</h2><p>${esc(branch.firstStep || 'Let the group propose a first move.')}</p>
-      ${branch.hintRevealed ? `<div class="reveal-block hint"><span>Opened hint</span><p>${esc(branch.hint || 'No hint was written for this path.')}</p></div>` : ''}
-      ${branch.pathRevealed ? `<div class="reveal-block path"><span>Revealed path</span><p>${esc(branch.path || 'No facilitator note was written for this path.')}</p></div>` : ''}
-      <div class="tile-actions"><button class="secondary-button" data-action="toggle-hint" data-id="${branch.id}" ${!branch.hint ? 'disabled' : ''}>${branch.hintRevealed ? 'Close hint' : 'Open hint'}</button><button class="${branch.pathRevealed ? 'secondary-button' : 'primary-button'}" data-action="toggle-path" data-id="${branch.id}">${branch.pathRevealed ? 'Fold path' : 'Reveal path'}</button></div>
+      ${branch.hintRevealed ? `<div class="reveal-block hint"><span>Opened hint</span><p>${esc(branch.hint || 'No hint was written for this approach.')}</p></div>` : ''}
+      ${branch.pathRevealed ? `<div class="reveal-block path"><span>Revealed note</span><p>${esc(branch.path || 'No facilitator note was written for this approach.')}</p></div>` : ''}
+      <div class="tile-actions"><button class="secondary-button" data-action="toggle-hint" data-id="${branch.id}" ${!branch.hint ? 'disabled' : ''}>${branch.hintRevealed ? 'Close hint' : 'Open hint'}</button><button class="${branch.pathRevealed ? 'secondary-button' : 'primary-button'}" data-action="toggle-path" data-id="${branch.id}">${branch.pathRevealed ? 'Hide note' : 'Reveal note'}</button></div>
       ${branch.rationales.length ? `<details><summary>Hear ${branch.rationales.length} ${branch.rationales.length === 1 ? 'reason' : 'reasons'}</summary><ul class="rationale-list">${branch.rationales.map(item => `<li>“${esc(item.text)}”</li>`).join('')}</ul></details>` : '<p class="no-reasons">No written reasons yet.</p>'}
-    </article>`).join('')}</section>` : `<div class="empty-piece"><span class="empty-mark">Y</span><div><h2>No paths to open</h2><p>Return to Shape and add at least one approach.</p></div></div>`}
-    ${current.alternativeIdeas.length ? `<section class="alternative-ideas"><p class="eyebrow">Paths from the room</p><h2>Ideas that arrived outside the tiles</h2><ul>${current.alternativeIdeas.map(item => `<li>${esc(item.text)}</li>`).join('')}</ul></section>` : ''}
+    </article>`).join('')}</section>` : `<div class="empty-piece"><span class="empty-mark">Y</span><div><h2>No approaches to reveal</h2><p>Return to Write and add at least one approach.</p></div></div>`}
+    ${current.alternativeIdeas.length ? `<section class="alternative-ideas"><p class="eyebrow">Other suggestions</p><h2>Approaches suggested during voting</h2><ul>${current.alternativeIdeas.map(item => `<li>${esc(item.text)}</li>`).join('')}</ul></section>` : ''}
   </main>`;
 }
 
 function renderRecap(current: CircleSession): string {
   return `<main id="main" class="workspace recap-workspace">
     <section class="recap-title"><div><p class="eyebrow">Session recap · ${new Date(current.updatedAt).toLocaleDateString()}</p><h1>${esc(current.title || 'Untitled circle')}</h1><p>${esc(current.problem || 'No problem prompt was added.')}</p></div><div class="recap-actions"><button class="primary-button" data-action="print">Print one-page recap</button><button class="secondary-button" data-action="export">Export data</button></div></section>
-    <dl class="recap-stats"><div><dt>Ideas placed</dt><dd>${participationCount(current)}</dd></div><div><dt>Votes</dt><dd>${totalVotes(current)}</dd></div><div><dt>Paths opened</dt><dd>${current.branches.filter(b => b.pathRevealed).length}/${current.branches.length}</dd></div></dl>
-    <section class="recap-paths" aria-labelledby="recap-paths-heading"><h2 id="recap-paths-heading">The paths we kept</h2>
+    <dl class="recap-stats"><div><dt>Ideas added</dt><dd>${participationCount(current)}</dd></div><div><dt>Votes</dt><dd>${totalVotes(current)}</dd></div><div><dt>Notes revealed</dt><dd>${current.branches.filter(b => b.pathRevealed).length}/${current.branches.length}</dd></div></dl>
+    <section class="recap-paths" aria-labelledby="recap-paths-heading"><h2 id="recap-paths-heading">Approaches from this session</h2>
       ${current.branches.length ? `<ol>${current.branches.map(branch => `<li><header><h3>${esc(branch.title)}</h3><span>${branch.votes} ${branch.votes === 1 ? 'vote' : 'votes'}</span></header><p>${esc(branch.path || branch.firstStep || 'No note added.')}</p>${branch.rationales.length ? `<ul>${branch.rationales.map(r => `<li>“${esc(r.text)}”</li>`).join('')}</ul>` : ''}</li>`).join('')}</ol>` : '<p>No approaches were recorded.</p>'}
     </section>
-    ${current.alternativeIdeas.length ? `<section class="recap-alternatives"><h2>Other paths proposed</h2><ul>${current.alternativeIdeas.map(r => `<li>${esc(r.text)}</li>`).join('')}</ul></section>` : ''}
-    <section class="reflection"><h2>Carry one question forward</h2><div class="reflection-line" aria-hidden="true"></div></section>
+    ${current.alternativeIdeas.length ? `<section class="recap-alternatives"><h2>Other approaches proposed</h2><ul>${current.alternativeIdeas.map(r => `<li>${esc(r.text)}</li>`).join('')}</ul></section>` : ''}
+    <section class="reflection"><h2>Question for the next session</h2><div class="reflection-line" aria-hidden="true"></div></section>
     <p class="print-credit">Made locally with Branching Problem Circle · no participant accounts</p>
   </main>`;
 }
@@ -255,7 +255,7 @@ function render(): void {
     return;
   }
   const status = `<div class="route-status visually-hidden" aria-live="polite">${esc(document.title)}</div><div class="toast-region" aria-live="polite" aria-atomic="true">${error ? `<div class="toast error">${esc(error)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : notice ? `<div class="toast">${esc(notice)}<button data-action="dismiss-status" aria-label="Dismiss message">×</button></div>` : ''}</div>`;
-  const demoBanner = isDemo() ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span><button class="text-button" data-action="reset-demo">Reset demo</button><a class="text-button" href="/">Start for real</a></span></aside>` : '';
+  const demoBanner = isDemo() ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span><button class="text-button" data-action="reset-demo">Reset demo</button><button class="text-button" data-action="start-real">Start for real</button></span></aside>` : '';
   if (!circle) app.innerHTML = `${renderWelcome()}${status}${showTemplates ? templateDialog() : ''}<input id="import-input" aria-label="Import circle JSON file" class="visually-hidden" type="file" accept="application/json,.json" />`;
   else {
     const phaseContent = circle.phase === 'shape' ? renderShape(circle) : circle.phase === 'vote' ? renderVote(circle) : circle.phase === 'explore' ? renderExplore(circle) : renderRecap(circle);
@@ -288,12 +288,12 @@ async function persist(message?: string, retainPhaseFocus = false, rerender = tr
   if (retainPhaseFocus && circle) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[role="tab"][data-phase="${circle?.phase}"]`)?.focus());
 }
 
-function setPhase(phase: Phase): void {
+function setPhase(phase: Phase, retainPhaseFocus = false): void {
   if (!circle) return;
   editingBranchId = null;
   circle.phase = phase;
   navigate(`/circle/${phase}${isDemo() ? '?demo=1' : ''}`, false);
-  void persist(undefined, true, false);
+  void persist(undefined, retainPhaseFocus, false);
 }
 
 function downloadData(): void {
@@ -318,6 +318,13 @@ app.addEventListener('click', event => {
   if (action === 'templates') { templateOpener = target; showTemplates = true; render(); }
   if (action === 'close-templates') { showTemplates = false; render(); restoreTemplateFocus(); }
   if (action === 'reset-demo' && isDemo()) { circle = makeDemoCircle(); editingBranchId = null; void clearCircle().then(() => persist('The sample circle was reset.')); }
+  if (action === 'start-real' && isDemo()) {
+    if (target instanceof HTMLButtonElement) { target.disabled = true; target.textContent = 'Clearing demo…'; }
+    void clearCircle().then(() => location.assign('/')).catch(() => {
+      error = 'The demo could not be cleared. Select Start for real again.';
+      render();
+    });
+  }
   if (action === 'dismiss-status') { notice = ''; error = ''; render(); }
   if (action === 'add-branch' && circle) { editingBranchId = 'new'; render(); document.querySelector('#branch-editor-heading')?.scrollIntoView({ behavior: 'smooth' }); }
   if (action === 'cancel-branch') { editingBranchId = null; render(); }
@@ -370,19 +377,19 @@ app.addEventListener('submit', event => {
     if (!branch) { branch = { ...makeBranch(), id }; circle.branches.push(branch); }
     branch.title = String(data.get('title') ?? '').trim(); branch.firstStep = String(data.get('firstStep') ?? '').trim();
     branch.hint = String(data.get('hint') ?? '').trim(); branch.path = String(data.get('path') ?? '').trim();
-    editingBranchId = null; void persist(`“${branch.title}” is on the table.`);
+    editingBranchId = null; void persist(`“${branch.title}” was added to the circle.`);
   }
   if (form.id === 'vote-form' && circle) {
     const branchId = String(data.get('branch') ?? ''); const rationale = String(data.get('rationale') ?? '').trim(); const alternative = String(data.get('alternative') ?? '').trim();
     const errorNode = form.querySelector('#vote-error');
     if ((!branchId && !alternative) || (branchId && !rationale && !alternative)) {
-      if (errorNode) errorNode.textContent = branchId ? 'Add one reason or offer a different path.' : 'Choose a path or offer a different one.';
+      if (errorNode) errorNode.textContent = branchId ? 'Add one reason or offer a different approach.' : 'Choose an approach or offer a different one.';
       return;
     }
     const now = Date.now();
     if (branchId) { const branch = circle.branches.find(item => item.id === branchId); if (branch) { branch.votes += 1; if (rationale) branch.rationales.push({ id: createId(), text: rationale, createdAt: now }); } }
     if (alternative) circle.alternativeIdeas.push({ id: createId(), text: alternative, createdAt: now });
-    void persist('Idea placed. Pass the device to the next thinker.');
+    void persist('Vote recorded. Pass the device to the next participant.');
   }
 });
 
@@ -410,7 +417,7 @@ app.addEventListener('keydown', event => {
   const tabs = [...document.querySelectorAll<HTMLElement>('[role="tab"]')];
   const index = tabs.indexOf(tab);
   const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-  setPhase(tabs[next].dataset.phase as Phase);
+  setPhase(tabs[next].dataset.phase as Phase, true);
   requestAnimationFrame(() => document.querySelector<HTMLElement>(`[role="tab"][data-phase="${tabs[next].dataset.phase}"]`)?.focus());
 });
 

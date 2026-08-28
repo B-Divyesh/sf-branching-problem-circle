@@ -26,6 +26,20 @@ describe('static deployment contract', () => {
     expect(config.routes.find(route => route.route === '/manifest.json')?.headers?.['Cache-Control']).toContain('86400');
   });
 
+  it('ships an installable offline manifest and demo shell', () => {
+    const manifest = JSON.parse(readFileSync('public/manifest.json', 'utf8')) as {
+      start_url: string;
+      display: string;
+      icons: { sizes: string; purpose: string }[];
+    };
+    expect(manifest.start_url).toContain('v=3');
+    expect(manifest.display).toBe('standalone');
+    expect(manifest.icons.some(icon => icon.sizes === '192x192')).toBeTruthy();
+    expect(manifest.icons.some(icon => icon.sizes === '512x512')).toBeTruthy();
+    expect(manifest.icons.some(icon => icon.purpose === 'maskable')).toBeTruthy();
+    expect(readFileSync('public/sw.js', 'utf8')).toContain("'/?demo=1'");
+  });
+
   it('ships complete route metadata and consistent static-page navigation', () => {
     const routes = ['index.html', 'privacy/index.html', 'terms/index.html', '404.html', 'offline.html'];
     for (const route of routes) {

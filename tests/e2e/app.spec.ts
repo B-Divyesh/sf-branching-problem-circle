@@ -5,7 +5,7 @@ import { PDFDocument } from 'pdf-lib';
 test('@claim:demo-sample opens a realistic sample circle in one click', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
-  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page).toHaveURL(/\?demo=1$/);
   await expect(page.getByLabel('Demo mode')).toContainText('sample data, nothing is saved');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('A hexagon has six corners');
   await expect(page.getByText('3 votes', { exact: true })).toBeVisible();
@@ -17,22 +17,46 @@ test('@claim:demo-isolation keeps sample data out of the real circle', async ({ 
   await expect(page.getByLabel('Demo mode')).toContainText('sample data, nothing is saved');
   await page.getByRole('button', { name: 'Close hint' }).first().click();
   await expect(page.getByText(/Each corner belongs/)).toHaveCount(0);
-  await page.getByRole('button', { name: 'Reset demo' }).click();
-  await expect(page.getByText(/Each corner belongs/)).toBeVisible();
-  await page.getByRole('link', { name: 'Start for real' }).click();
+
+  await page.getByRole('button', { name: 'Start for real' }).click();
   await expect(page).toHaveURL('/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Compare several approaches/);
+  const recordsAfterExit = await page.evaluate(async () => {
+    const read = (name: string) => new Promise<unknown>((resolve, reject) => {
+      const opened = indexedDB.open(name, 1);
+      opened.onerror = () => reject(opened.error);
+      opened.onupgradeneeded = () => opened.result.createObjectStore('circles');
+      opened.onsuccess = () => {
+        const db = opened.result;
+        const request = db.transaction('circles').objectStore('circles').get('active');
+        request.onsuccess = () => { resolve(request.result); db.close(); };
+        request.onerror = () => reject(request.error);
+      };
+    });
+    return { demo: await read('branching-problem-circle-demo'), real: await read('branching-problem-circle') };
+  });
+  expect(recordsAfterExit).toEqual({ demo: undefined, real: undefined });
+
+  await page.goto('/?demo=1');
+  await expect(page.getByText(/Each corner belongs/)).toBeVisible();
+  await page.getByRole('button', { name: 'Close hint' }).first().click();
+  await expect(page.getByText(/Each corner belongs/)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Reset demo' }).click();
+  await expect(page.getByText(/Each corner belongs/)).toBeVisible();
+  await page.getByRole('button', { name: 'Start for real' }).click();
+  await expect(page).toHaveURL('/');
   await page.getByRole('button', { name: 'Create a circle' }).click();
   await expect(page.getByLabel('Circle title')).toHaveValue('');
 });
 
 test('@claim:browser-only keeps normal and demo flows same-origin', async ({ page }) => {
-  const urls: string[] = [];
-  page.on('request', request => urls.push(request.url()));
+  const requests: { method: string; url: string }[] = [];
+  page.on('request', request => requests.push({ method: request.method(), url: request.url() }));
   await page.goto('/demo');
   await page.getByRole('button', { name: 'Open hint' }).first().click();
-  await page.getByRole('button', { name: 'Reveal path' }).first().click();
-  expect(urls.every(url => new URL(url).origin === 'http://127.0.0.1:4173')).toBeTruthy();
+  await page.getByRole('button', { name: 'Reveal note' }).first().click();
+  expect(requests.every(request => new URL(request.url).origin === 'http://127.0.0.1:4173')).toBeTruthy();
+  expect(requests.every(request => request.method === 'GET')).toBeTruthy();
 });
 
 test('@claim:single-device exposes only local shared-device controls and storage', async ({ page }) => {
@@ -72,7 +96,7 @@ test('@claim:six-approaches limits a circle to six approaches', async ({ page })
 test('@claim:recap-export prints one A4 page with sample content and exports JSON', async ({ page }) => {
   await page.goto('/demo');
   await page.getByRole('tab', { name: /Recap/ }).click();
-  await expect(page.getByText('The paths we kept')).toBeVisible();
+  await expect(page.getByText('Approaches from this session')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Draw and arrange' })).toBeVisible();
   const pdf = await page.pdf({ format: 'A4', printBackground: true });
@@ -90,18 +114,22 @@ test('@claim:json-import replaces a real circle from a valid export without chan
   const exportPath = await exported.path();
   expect(exportPath).toBeTruthy();
 
-  await page.getByRole('link', { name: 'Start for real' }).click();
+  await page.getByRole('button', { name: 'Start for real' }).click();
   await page.getByRole('button', { name: 'Create a circle' }).click();
   await page.getByLabel('Circle title').fill('Circle to replace');
   await page.getByLabel('Problem prompt').fill('This circle should be replaced.');
   await page.getByLabel(/permission/).check();
   await page.getByRole('button', { name: 'Save problem' }).click();
 
-  const replacementPreview = page.waitForEvent('dialog');
-  await page.locator('#import-input').setInputFiles(exportPath!);
-  const dialog = await replacementPreview;
-  expect(dialog.message()).toContain('Replace “Circle to replace” with “A hexagon has six corners”?');
-  await dialog.accept();
+  let replacementMessage = '';
+  await Promise.all([
+    page.waitForEvent('dialog').then(async dialog => {
+      replacementMessage = dialog.message();
+      await dialog.accept();
+    }),
+    page.locator('#import-input').setInputFiles(exportPath!)
+  ]);
+  expect(replacementMessage).toContain('Replace “Circle to replace” with “A hexagon has six corners”?');
   await expect(page.getByText('Imported circle saved on this device.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
 
@@ -139,9 +167,31 @@ test('enforces rights, recovers from bad imports, and keeps the prior circle', a
   await page.getByLabel('Problem prompt').fill('Can we share this?');
   await page.getByRole('button', { name: 'Save problem' }).click();
   await expect(page.getByLabel(/permission/)).toBeFocused();
+  const beforePermission = await page.evaluate(async () => new Promise<{ title: string; rightsConfirmed: boolean }>((resolve, reject) => {
+    const opened = indexedDB.open('branching-problem-circle', 1);
+    opened.onerror = () => reject(opened.error);
+    opened.onsuccess = () => {
+      const db = opened.result;
+      const request = db.transaction('circles').objectStore('circles').get('active');
+      request.onsuccess = () => { resolve(request.result); db.close(); };
+      request.onerror = () => reject(request.error);
+    };
+  }));
+  expect(beforePermission).toMatchObject({ title: '', rightsConfirmed: false });
   await page.getByLabel(/permission/).check();
   await page.getByRole('button', { name: 'Save problem' }).click();
   await expect(page.getByText('Problem saved on this device.')).toBeVisible();
+  const afterPermission = await page.evaluate(async () => new Promise<{ title: string; rightsConfirmed: boolean }>((resolve, reject) => {
+    const opened = indexedDB.open('branching-problem-circle', 1);
+    opened.onerror = () => reject(opened.error);
+    opened.onsuccess = () => {
+      const db = opened.result;
+      const request = db.transaction('circles').objectStore('circles').get('active');
+      request.onsuccess = () => { resolve(request.result); db.close(); };
+      request.onerror = () => reject(request.error);
+    };
+  }));
+  expect(afterPermission).toMatchObject({ title: 'Rights check', rightsConfirmed: true });
   await page.getByRole('button', { name: 'Import', exact: true }).click();
   await page.locator('#import-input').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{bad') });
   await expect(page.getByText('This file is not a valid circle export. Choose a JSON file exported by Branching Problem Circle.')).toBeVisible();
@@ -157,24 +207,64 @@ test('keeps keyboard focus for phase tabs and template dialog', async ({ page })
   await page.keyboard.press('End');
   await expect(page.getByRole('tab', { name: /Recap/ })).toBeFocused();
   await page.keyboard.press('Home');
-  await expect(page.getByRole('tab', { name: /Shape/ })).toBeFocused();
+  await expect(page.getByRole('tab', { name: /Write/ })).toBeFocused();
   await page.keyboard.press('ArrowLeft');
   await expect(page.getByRole('tab', { name: /Recap/ })).toBeFocused();
   await page.getByRole('button', { name: 'Templates' }).click();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Templates' })).toBeFocused();
+  await page.getByRole('button', { name: 'Templates' }).click();
+  await page.getByRole('button', { name: 'Close templates' }).click();
+  await expect(page.getByRole('button', { name: 'Templates' })).toBeFocused();
+  await page.getByRole('button', { name: 'Templates' }).click();
+  page.once('dialog', dialog => void dialog.accept());
+  await page.getByRole('button', { name: 'Use template' }).first().click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Templates', exact: true })).toBeFocused();
+});
+
+test('respects reduced motion and loads without browser errors', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(String(error)));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/demo');
+  const timing = await page.locator('.path-tile').first().evaluate(element => {
+    const style = getComputedStyle(element);
+    const milliseconds = (value: string) => value.endsWith('ms') ? Number.parseFloat(value) : Number.parseFloat(value) * 1000;
+    return { animation: milliseconds(style.animationDuration), transition: milliseconds(style.transitionDuration) };
+  });
+  expect(timing.animation).toBeLessThanOrEqual(0.01);
+  expect(timing.transition).toBeLessThanOrEqual(0.01);
+  for (const route of ['/', '/privacy/', '/terms/', '/404.html', '/offline.html']) {
+    await page.goto(route);
+    await expect(page.locator('main')).toBeVisible();
+  }
+  expect(errors).toEqual([]);
 });
 
 test('has accessible pages and 44px mobile links', async ({ page }) => {
   await page.goto('/');
   let results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   for (const link of [page.getByRole('link', { name: 'Branching Problem Circle' }), page.getByRole('link', { name: 'Privacy' }).first(), page.getByRole('link', { name: 'Terms' })]) {
     const box = await link.boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
   }
   await page.goto('/demo');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+  await page.getByRole('button', { name: 'Templates' }).click();
+  const dialogBox = await page.getByRole('dialog').boundingBox();
+  expect(dialogBox?.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  for (const control of await page.getByRole('dialog').locator('a:visible, button:visible').all()) {
+    const box = await control.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+  await page.getByRole('button', { name: 'Close templates' }).click();
   await page.getByRole('tab', { name: /Recap/ }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
 });
@@ -191,13 +281,26 @@ test('uses route titles, deep links, and a real 404 page', async ({ page }) => {
   await expect(page).toHaveURL(/\/circle\/recap\?demo=1$/);
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeFocused();
   await page.reload();
-  await expect(page.getByText('The paths we kept')).toBeVisible();
+  await expect(page.getByText('Approaches from this session')).toBeVisible();
   await page.goto('/');
   await page.getByRole('button', { name: 'Create a circle' }).click();
-  await expect(page).toHaveTitle('Shape a circle — Branching Problem Circle');
+  await expect(page).toHaveTitle('Write a problem — Branching Problem Circle');
   await page.goto('/404.html');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page is not part of the circle');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page does not exist');
   await expect(page.getByRole('link', { name: 'How it works' })).toBeVisible();
+});
+
+test('uses direct headings for authoring, empty voting, and recap', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create a circle' }).click();
+  await expect(page.getByRole('heading', { name: 'Approaches', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Add approach 0\/6/ }).click();
+  await expect(page.getByRole('heading', { name: 'Add an approach' })).toBeVisible();
+  await page.getByRole('tab', { name: /Collect/ }).click();
+  await expect(page.getByRole('heading', { name: 'Add a problem and approach before collecting votes' })).toBeVisible();
+  await page.goto('/?demo=1');
+  await page.getByRole('tab', { name: /Recap/ }).click();
+  await expect(page.getByRole('heading', { name: 'Question for the next session' })).toBeVisible();
 });
 
 for (const route of ['/', '/privacy/', '/terms/', '/404.html', '/offline.html']) {

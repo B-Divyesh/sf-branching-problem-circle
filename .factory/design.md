@@ -38,9 +38,9 @@ On phones, the facilitator rail becomes a compact top status area and branch til
 
 ## Interaction grammar
 
-- `Shape the problem` creates or edits the working piece.
+- `Write` creates or edits the problem and its approaches.
 - `Invite ideas` opens the anonymous participant voting view with a short room code.
-- `Open a hint` and `Reveal path` uncover content in facilitator-controlled order.
+- `Open hint` and `Reveal note` uncover content in facilitator-controlled order.
 - Votes appear as small cobalt glaze beads and exact counts, never a leaderboard.
 - Every mutation confirms in a restrained live region. Destructive actions name the target and require confirmation; import previews before replacement.
 - Keyboard: ordinary tab order, Enter/Space for actions, arrow keys inside the phase tabs, Escape closes dialogs.

@@ -26,7 +26,7 @@ export const templates: CircleTemplate[] = [
   {
     id: 'compare', name: 'Compare three approaches', paid: false,
     description: 'Seed visual, algebraic, and pattern-seeking approaches.',
-    build: () => fromTitles('Three lenses', 'Paste your rights-cleared problem here.', ['Draw or model it', 'Name the quantities', 'Test a pattern'])
+    build: () => fromTitles('Compare three approaches', 'Paste your rights-cleared problem here.', ['Draw or model it', 'Name the quantities', 'Test a pattern'])
   },
   {
     id: 'stuck', name: 'Compare failed approaches', paid: false,
