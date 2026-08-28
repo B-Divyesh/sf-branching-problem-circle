@@ -50,8 +50,10 @@ const checkedLinks = new Set();
 async function newPage(width, height) {
   const context = await browser.newContext({ viewport: { width, height } });
   const page = await context.newPage();
-  page.on('pageerror', error => errors.push(String(error)));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('pageerror', error => errors.push({ kind: 'pageerror', text: String(error), url: page.url() }));
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push({ kind: 'console', text: message.text(), url: message.location().url });
+  });
   page.on('request', request => requestLog.push({ method: request.method(), url: request.url() }));
   return { context, page };
 }
@@ -71,6 +73,9 @@ async function scan(page, label) {
   const hrefs = await page.locator('a[href]').evaluateAll(links => links.map(link => link.href));
   for (const href of hrefs) {
     if (!href.startsWith(base) || checkedLinks.has(href)) continue;
+    const current = new URL(page.url());
+    const linkedUrl = new URL(href);
+    if (linkedUrl.origin === current.origin && linkedUrl.pathname === current.pathname && linkedUrl.search === current.search && linkedUrl.hash) continue;
     checkedLinks.add(href);
     const linked = await fetch(href, { redirect: 'manual', cache: 'no-store' });
     assert.ok(linked.status >= 200 && linked.status < 400, `dead link ${href}: ${linked.status}`);
@@ -124,10 +129,10 @@ const recordsAfterExit = await demoPage.evaluate(async () => {
 });
 assert.deepEqual(recordsAfterExit, { demo: undefined, real: undefined });
 await demoPage.goto(`${base}/?demo=1`);
-assert.ok(await demoPage.getByText(/Each corner belongs/).isVisible());
+await demoPage.getByText(/Each corner belongs/).waitFor();
 await demoPage.getByRole('button', { name: 'Close hint' }).first().click();
 await demoPage.getByRole('button', { name: 'Reset demo' }).click();
-assert.ok(await demoPage.getByText(/Each corner belongs/).isVisible());
+await demoPage.getByText(/Each corner belongs/).waitFor();
 record('demo exit disposal, pristine re-entry, and reset');
 
 const collectTab = demoPage.getByRole('tab', { name: /Collect/ });
@@ -175,6 +180,10 @@ await importContext.close();
 const { context: mobileContext, page: mobilePage } = await newPage(390, 844);
 await mobilePage.goto(`${base}/?demo=1`, { waitUntil: 'networkidle' });
 assert.equal(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+for (const tab of await mobilePage.getByRole('tab').all()) {
+  const box = await tab.boundingBox();
+  assert.ok(box && box.height >= 44 && box.x >= 0 && box.x + box.width <= 390, 'phase tab is clipped on mobile');
+}
 for (const control of await mobilePage.locator('a:visible, button:visible').all()) {
   const box = await control.boundingBox();
   assert.ok(box && box.width >= 44 && box.height >= 44, `small target: ${await control.textContent()}`);
@@ -214,14 +223,19 @@ for (const [path, title] of [
 }
 await routeContext.close();
 
-assert.deepEqual(errors, []);
+const expected404Errors = errors.filter(error => error.kind === 'console'
+  && error.text === 'Failed to load resource: the server responded with a status of 404 ()'
+  && error.url === `${base}/not-a-real-polish-3-route`);
+const unexpectedErrors = errors.filter(error => !expected404Errors.includes(error));
+assert.equal(expected404Errors.length, 1);
+assert.deepEqual(unexpectedErrors, []);
 assert.ok(requestLog.length > 0);
 assert.equal(requestLog.every(request => new URL(request.url).origin === new URL(base).origin), true);
 assert.equal(requestLog.every(request => request.method === 'GET'), true);
-record('console and privacy request log', `${requestLog.length} same-origin GET requests`);
+record('console and privacy request log', `no unexpected errors; ${requestLog.length} same-origin GET requests`);
 record('internal link crawl', `${checkedLinks.size} unique links`);
 
 await browser.close();
-const report = { base, checkedAt: new Date().toISOString(), checks, errors, requests: requestLog.length };
+const report = { base, checkedAt: new Date().toISOString(), checks, errors: unexpectedErrors, expected404Errors, requests: requestLog.length };
 writeFileSync(`${evidenceDir}/polish-3-live-report.json`, `${JSON.stringify(report, null, 2)}\n`);
 process.stdout.write(`LIVE VERIFY PASS (${checks.length} checks)\n`);

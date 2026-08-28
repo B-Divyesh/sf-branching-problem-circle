@@ -256,6 +256,12 @@ test('has accessible pages and 44px mobile links', async ({ page }) => {
   }
   await page.goto('/demo');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+  for (const tab of await page.getByRole('tab').all()) {
+    const box = await tab.boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+    expect(box?.x).toBeGreaterThanOrEqual(0);
+    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(page.viewportSize()!.width);
+  }
   await page.getByRole('button', { name: 'Templates' }).click();
   const dialogBox = await page.getByRole('dialog').boundingBox();
   expect(dialogBox?.width).toBeLessThanOrEqual(page.viewportSize()!.width);

@@ -266,9 +266,10 @@ input:hover, textarea:hover { border-color: #667773; }
   .hero-piece img { border-radius: 24% 15% 22% 16% / 14% 20% 15% 21%; }
   .app-head .wordmark span { display: none; }
   .head-actions .quiet-button { flex: 0 0 auto; }
-  .phase-nav { width: calc(100% + 32px); margin-left: -16px; overflow-x: auto; }
-  .phase-nav [role="tablist"] { min-width: 410px; }
-  .phase-tab { min-height: 55px; font-size: .9rem; }
+  .phase-nav { width: calc(100% + 32px); margin-left: -16px; }
+  .phase-nav [role="tablist"] { min-width: 0; }
+  .phase-tab { display: flex; min-width: 0; min-height: 58px; padding: 4px 1px; align-items: center; justify-content: center; flex-direction: column; gap: 2px; font-size: .78rem; }
+  .phase-tab span { width: 23px; height: 23px; margin-right: 0; }
   .workspace, .vote-stage { margin-top: 42px; }
   .problem-form, .branch-editor { padding: 22px 18px; }
   .form-end { align-items: stretch; flex-direction: column; gap: 10px; }
