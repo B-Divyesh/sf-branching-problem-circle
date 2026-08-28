@@ -12,7 +12,8 @@ describe('static deployment contract', () => {
     expect(config.responseOverrides['404']).toEqual({ rewrite: '/404.html', statusCode: 404 });
     expect(config.routes.filter(route => route.rewrite)).toEqual([
       { route: '/demo', rewrite: '/index.html' },
-      { route: '/circle/*', rewrite: '/index.html' }
+      { route: '/circle/*', rewrite: '/index.html' },
+      { route: '/manifest.webmanifest', rewrite: '/manifest.json' }
     ]);
   });
 
@@ -20,6 +21,7 @@ describe('static deployment contract', () => {
     expect(config.globalHeaders['Content-Security-Policy']).toContain("frame-ancestors 'none'");
     expect(config.globalHeaders['Permissions-Policy']).toContain('camera=()');
     expect(config.routes.find(route => route.route === '/assets/*')?.headers?.['Cache-Control']).toContain('immutable');
-    expect(config.routes.find(route => route.route === '/manifest.webmanifest')?.headers?.['Content-Type']).toBe('application/manifest+json');
+    expect(config.routes.find(route => route.route === '/manifest.webmanifest')?.rewrite).toBe('/manifest.json');
+    expect(config.routes.find(route => route.route === '/manifest.json')?.headers?.['Cache-Control']).toContain('86400');
   });
 });
