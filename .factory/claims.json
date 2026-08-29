@@ -53,7 +53,7 @@
     "claim": "A valid circle JSON export can be imported.",
     "where": "landing Import a circle action, README feature list, privacy and terms",
     "test": "npm run test:e2e -- --grep @claim:json-import",
-    "sandbox": "fresh /demo context; export the sample, enter real mode, confirm replacement preview, reload, and verify demo remains separate"
+    "sandbox": "fresh /demo context; export the sample, enter real mode, confirm replacement preview, immediately reload after the imported title renders, and verify demo remains separate"
   },
   {
     "id": "included-templates",

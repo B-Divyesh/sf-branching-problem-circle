@@ -132,16 +132,50 @@ test('@claim:json-import replaces a real circle from a valid export without chan
   const previewAxe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(previewAxe.violations.filter(item => ['serious', 'critical'].includes(item.impact ?? ''))).toEqual([]);
   await importPreview.getByRole('button', { name: 'Replace circle' }).click();
-  await expect(page.getByText('Imported circle saved on this device.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
-
-  await page.goto('/');
+  await page.reload();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
   await page.goto('/?demo=1');
   await expect(page.getByLabel('Demo mode')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'A hexagon has six corners' })).toBeVisible();
   const databases = await page.evaluate(async () => (await indexedDB.databases()).map(item => item.name).sort());
   expect(databases).toEqual(['branching-problem-circle', 'branching-problem-circle-demo']);
+});
+
+test('keeps the prior circle when an imported circle cannot be saved', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create a circle' }).click();
+  await page.getByLabel('Circle title').fill('Circle to keep');
+  await page.getByLabel('Problem prompt').fill('This circle must remain available.');
+  await page.getByLabel(/permission/).check();
+  await page.getByRole('button', { name: 'Save problem' }).click();
+  await expect(page.getByText('Problem saved on this device.')).toBeVisible();
+
+  await page.locator('#import-input').setInputFiles({
+    name: 'unsaveable-circle.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({
+      title: 'Imported circle that cannot save', problem: 'A valid but blocked import.', rightsConfirmed: true,
+      phase: 'shape', branches: [], alternativeIdeas: []
+    }))
+  });
+  const importPreview = page.getByRole('dialog', { name: 'Replace the current circle?' });
+  await expect(importPreview).toBeVisible();
+  await page.evaluate(() => {
+    const state = globalThis as typeof globalThis & { __bpcOriginalPut?: IDBObjectStore['put'] };
+    state.__bpcOriginalPut = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function (value: unknown, key?: IDBValidKey): IDBRequest<IDBValidKey> {
+      if (typeof value === 'object' && value !== null && (value as { title?: string }).title === 'Imported circle that cannot save') {
+        throw new Error('simulated local storage failure');
+      }
+      return state.__bpcOriginalPut!.call(this, value, key);
+    };
+  });
+  await page.evaluate(() => document.querySelector<HTMLButtonElement>('[data-action="confirm-import"]')?.click());
+  await expect(page.getByText('The imported circle could not be saved. Your current circle was kept. Try again.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Circle to keep' })).toBeVisible();
+  await page.evaluate(() => {
+    const state = globalThis as typeof globalThis & { __bpcOriginalPut?: IDBObjectStore['put'] };
+    if (state.__bpcOriginalPut) IDBObjectStore.prototype.put = state.__bpcOriginalPut;
+  });
 });
 
 test('@claim:included-templates makes every shipped template usable without checkout', async ({ page }) => {

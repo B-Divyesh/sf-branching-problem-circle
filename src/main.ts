@@ -18,6 +18,7 @@ let installPrompt: BeforeInstallPromptEvent | null = null;
 let templateOpener: HTMLElement | null = null;
 let importOpener: HTMLElement | null = null;
 let pendingImport: CircleSession | null = null;
+let importSaving = false;
 let routeFocus = false;
 
 const isDemo = (): boolean => location.pathname === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
@@ -259,12 +260,14 @@ function templateDialog(): string {
 }
 
 function importDialog(imported: CircleSession): string {
-  return `<dialog id="import-dialog" class="confirm-dialog" aria-labelledby="import-dialog-title">
+  const saving = importSaving;
+  return `<dialog id="import-dialog" class="confirm-dialog" aria-labelledby="import-dialog-title" aria-busy="${saving}">
     <p class="eyebrow">Import preview</p>
     <h2 id="import-dialog-title">Replace the current circle?</h2>
     <p><strong>“${esc(circle?.title || 'Untitled circle')}”</strong> will be replaced with <strong>“${esc(imported.title || 'Untitled circle')}”</strong>.</p>
     <p>Export the current circle first if you want to keep it.</p>
-    <div class="dialog-actions"><button class="secondary-button" data-action="cancel-import">Cancel import</button><button class="primary-button" data-action="confirm-import">Replace circle</button></div>
+    ${saving ? '<p class="save-note" role="status">Saving the imported circle on this device…</p>' : ''}
+    <div class="dialog-actions"><button class="secondary-button" data-action="cancel-import" ${saving ? 'disabled' : ''}>Cancel import</button><button class="primary-button" data-action="confirm-import" ${saving ? 'disabled' : ''}>${saving ? 'Saving import…' : 'Replace circle'}</button></div>
   </dialog>`;
 }
 
@@ -295,6 +298,7 @@ function render(): void {
     dialog?.showModal();
     dialog?.addEventListener('cancel', event => {
       event.preventDefault();
+      if (importSaving) return;
       pendingImport = null;
       render();
       restoreImportFocus();
@@ -315,6 +319,29 @@ async function persist(message?: string, retainPhaseFocus = false, rerender = tr
   catch (reason) { error = reason instanceof Error ? reason.message : 'The circle could not be saved.'; }
   if (rerender || error) render();
   if (retainPhaseFocus && circle) requestAnimationFrame(() => document.querySelector<HTMLElement>(`[role="tab"][data-phase="${circle?.phase}"]`)?.focus());
+}
+
+async function saveImportedCircle(imported: CircleSession): Promise<void> {
+  const previousCircle = circle;
+  importSaving = true;
+  render();
+  try {
+    await saveCircle(imported);
+    circle = imported;
+    pendingImport = null;
+    importSaving = false;
+    error = '';
+    notice = 'Imported circle saved on this device.';
+    navigate(`/circle/${imported.phase}${isDemo() ? '?demo=1' : ''}`);
+  } catch {
+    circle = previousCircle;
+    pendingImport = null;
+    importSaving = false;
+    notice = '';
+    error = 'The imported circle could not be saved. Your current circle was kept. Try again.';
+    render();
+    restoreImportFocus();
+  }
 }
 
 function setPhase(phase: Phase, retainPhaseFocus = false): void {
@@ -370,12 +397,10 @@ app.addEventListener('click', event => {
   }
   if (action === 'export') downloadData();
   if (action === 'import') { importOpener = target; document.querySelector<HTMLInputElement>('#import-input')?.click(); }
-  if (action === 'cancel-import') { pendingImport = null; render(); restoreImportFocus(); }
+  if (action === 'cancel-import' && !importSaving) { pendingImport = null; render(); restoreImportFocus(); }
   if (action === 'confirm-import' && pendingImport) {
-    circle = pendingImport;
-    pendingImport = null;
-    navigate(`/circle/${circle.phase}${isDemo() ? '?demo=1' : ''}`, false);
-    void persist('Imported circle saved on this device.');
+    const imported = pendingImport;
+    void saveImportedCircle(imported);
   }
   if (action === 'clear-circle' && circle && confirm(`Clear “${circle.title || 'this circle'}” and all of its anonymous votes from this device? Export first if you want to keep it.`)) {
     const clearedTitle = circle.title || 'The circle';
@@ -437,11 +462,7 @@ app.addEventListener('change', event => {
     try {
       const imported = validateImport(JSON.parse(String(reader.result)));
       if (circle) { pendingImport = imported; render(); }
-      else {
-        circle = imported;
-        navigate(`/circle/${imported.phase}${isDemo() ? '?demo=1' : ''}`, false);
-        void persist('Imported circle saved on this device.');
-      }
+      else void saveImportedCircle(imported);
     } catch { error = 'This file is not a valid circle export. Choose a JSON file exported by Branching Problem Circle.'; render(); }
   };
   reader.onerror = () => { error = 'That file could not be read. Try exporting it again.'; render(); };

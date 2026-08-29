@@ -37,7 +37,7 @@ const manifestResponse = await response('/manifest.webmanifest');
 assert.match(manifestResponse.headers.get('content-type') || '', /json/i);
 record('cache and manifest headers', assetPath);
 
-const unknownResponse = await response('/not-a-real-polish-3-route');
+const unknownResponse = await response('/not-a-real-polish-4-route');
 assert.equal(unknownResponse.status, 404);
 assert.match(await unknownResponse.text(), /This page does not exist/);
 record('real 404 status');
@@ -99,7 +99,7 @@ for (const [name, width, height] of [['desktop', 1440, 900], ['mobile', 390, 844
     assert.ok(box && box.y + box.height <= height, `${name} first-screen element is below fold`);
   }
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-  await page.screenshot({ path: `${evidenceDir}/polish-3-home-${name}.png`, fullPage: true });
+  await page.screenshot({ path: `${evidenceDir}/polish-4-home-${name}.png`, fullPage: true });
   await context.close();
   record(`cold first screen ${name}`);
 }
@@ -143,7 +143,7 @@ await demoPage.getByRole('tab', { name: /Recap/ }).click();
 const pdf = await demoPage.pdf({ format: 'A4', printBackground: true });
 assert.equal((await PDFDocument.load(pdf)).getPageCount(), 1);
 assert.ok(await demoPage.getByRole('heading', { name: 'Question for the next session' }).isVisible());
-await demoPage.screenshot({ path: `${evidenceDir}/polish-3-demo-desktop.png`, fullPage: true });
+await demoPage.screenshot({ path: `${evidenceDir}/polish-4-demo-desktop.png`, fullPage: true });
 record('keyboard phase focus and one-page recap');
 await demoContext.close();
 
@@ -194,7 +194,7 @@ for (const control of await mobilePage.getByRole('dialog').locator('a:visible, b
   assert.ok(box && box.width >= 44 && box.height >= 44, `small dialog target: ${await control.textContent()}`);
 }
 await mobilePage.getByRole('button', { name: 'Close templates' }).click();
-await mobilePage.screenshot({ path: `${evidenceDir}/polish-3-demo-mobile.png`, fullPage: true });
+await mobilePage.screenshot({ path: `${evidenceDir}/polish-4-demo-mobile.png`, fullPage: true });
 record('mobile layout and 44px targets');
 await mobileContext.close();
 
@@ -213,7 +213,7 @@ for (const [path, title] of [
   ['/privacy/', 'Privacy — Branching Problem Circle'],
   ['/terms/', 'Terms — Branching Problem Circle'],
   ['/offline.html', 'Offline — Branching Problem Circle'],
-  ['/not-a-real-polish-3-route', 'Page not found — Branching Problem Circle']
+  ['/not-a-real-polish-4-route', 'Page not found — Branching Problem Circle']
 ]) {
   const navigation = await routePage.goto(`${base}${path}`, { waitUntil: 'networkidle' });
   assert.equal(navigation?.status(), path.startsWith('/not-') ? 404 : 200);
@@ -225,7 +225,7 @@ await routeContext.close();
 
 const expected404Errors = errors.filter(error => error.kind === 'console'
   && error.text === 'Failed to load resource: the server responded with a status of 404 ()'
-  && error.url === `${base}/not-a-real-polish-3-route`);
+  && error.url === `${base}/not-a-real-polish-4-route`);
 const unexpectedErrors = errors.filter(error => !expected404Errors.includes(error));
 assert.equal(expected404Errors.length, 1);
 assert.deepEqual(unexpectedErrors, []);
@@ -237,5 +237,5 @@ record('internal link crawl', `${checkedLinks.size} unique links`);
 
 await browser.close();
 const report = { base, checkedAt: new Date().toISOString(), checks, errors: unexpectedErrors, expected404Errors, requests: requestLog.length };
-writeFileSync(`${evidenceDir}/polish-3-live-report.json`, `${JSON.stringify(report, null, 2)}\n`);
+writeFileSync(`${evidenceDir}/polish-4-live-report.json`, `${JSON.stringify(report, null, 2)}\n`);
 process.stdout.write(`LIVE VERIFY PASS (${checks.length} checks)\n`);

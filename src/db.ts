@@ -24,10 +24,27 @@ async function request<T>(mode: IDBTransactionMode, action: (store: IDBObjectSto
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, mode);
-    const req = action(tx.objectStore(STORE));
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(new Error('The circle could not be saved locally.'));
-    tx.oncomplete = () => db.close();
+    let result: T;
+    let settled = false;
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      db.close();
+      reject(new Error('The circle could not be saved locally.'));
+    };
+    let req: IDBRequest<T>;
+    try { req = action(tx.objectStore(STORE)); }
+    catch { fail(); return; }
+    req.onsuccess = () => { result = req.result; };
+    req.onerror = fail;
+    tx.onerror = fail;
+    tx.onabort = fail;
+    tx.oncomplete = () => {
+      if (settled) return;
+      settled = true;
+      db.close();
+      resolve(result);
+    };
   });
 }
 
