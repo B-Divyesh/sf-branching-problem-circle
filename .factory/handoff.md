@@ -2,7 +2,7 @@
 
 ## Outcome
 
-**PASS.** Repair commit `3f761b4` fixes F-4-1 without changing the product’s static, local-first PWA class or glacial-ceramic visual system. The release was deployed as Static Web App deployment `deb0aeb7-a807-4c8c-bbf1-d9c82e8e465d` and cold-checked at <https://branching-problem-circle.sociobot.in>.
+**PASS.** Repair commit `3f761b4` fixes F-4-1; final audited commit is `d0a8efb`. The product remains a static, local-first PWA with its glacial-ceramic visual system. The release was deployed as Static Web App deployment `cce2768b-d8b0-473d-b980-be92dae0ec3f` and cold-checked at <https://branching-problem-circle.sociobot.in>.
 
 ## What changed
 
@@ -14,12 +14,13 @@
 
 ## Exact verification evidence
 
-- Clean clone: `/tmp/bpc-polish4-clean-qqIPDh/repo`; `npm ci` completed with 0 vulnerabilities.
+- Clean clone: `/tmp/bpc-polish4-final-Ll0dS7/repo` at `d0a8efbd1d4025a627e7762023f4831b3df7d16f`; `npm ci` completed with 0 vulnerabilities.
 - Every registered claim command passed from that clone: `demo-sample`, `demo-isolation`, `browser-only`, `single-device`, `offline-reload`, `six-approaches`, `recap-export`, `json-import`, `included-templates`, and `no-public-sharing`, each in desktop and 390px projects.
 - Clean clone `npm test` passed 9/9; `npm run build` produced `dist/index.html`; `npm run test:e2e` passed all 46 browser executions.
 - Local structure check: `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4174/ .factory/evidence/polish-4-local` reported title, `lang=en`, one h1, main landmark, image alt coverage, labeled buttons, and no console errors. Playwright’s integrated axe scans passed on all shipped routes; the standalone Axe CLI could not start Selenium Chrome in this image, so no CLI result is claimed.
 - Live command: `LIVE_BASE_URL=https://branching-problem-circle.sociobot.in EVIDENCE_DIR=.factory/evidence npm run test:live` passed 19/19 checks: headers, manifest/cache, real 404, desktop/mobile first screen, demo sandbox/reset/disposal, keyboard focus, A4 recap, import immediate-reload persistence, import failure preservation, mobile targets, offline reload, all route metadata/axe scans, console/privacy log, and link crawl.
-- Live URL check: `/opt/fleet/lib/verify-url.sh https://branching-problem-circle.sociobot.in .factory/evidence/polish-4-verify` reported HTTP 200, 722ms, no console errors, correct title/lang/one h1/main, no missing image alt text, and no unlabeled buttons.
+- Live URL check: `/opt/fleet/lib/verify-url.sh https://branching-problem-circle.sociobot.in .factory/evidence/polish-4-verify` reported HTTP 200, 652ms, no console errors, correct title/lang/one h1/main, no missing image alt text, and no unlabeled buttons.
+- Live Lighthouse (mobile): Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.1s and CLS 0. Report: `.factory/evidence/polish-4-lighthouse.json`.
 - Screenshots: `.factory/evidence/polish-4-home-desktop.png`, `.factory/evidence/polish-4-home-mobile.png`, `.factory/evidence/polish-4-demo-desktop.png`, `.factory/evidence/polish-4-demo-mobile.png`. Reports: `.factory/evidence/polish-4-live-report.json`, `.factory/evidence/polish-4-verify/verify.json`.
 
 ## How to run
@@ -28,4 +29,4 @@
 
 ## Known gaps
 
-None. The standalone Axe CLI is not runnable against this worker’s Selenium Chrome pairing, but equivalent Playwright Axe coverage is part of the passing browser and live suites.
+None. The standalone Axe CLI could not start this worker’s Selenium Chrome pairing; equivalent Playwright Axe coverage is part of the passing browser and live suites.

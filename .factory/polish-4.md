@@ -1,12 +1,12 @@
 # Polish round 4 — zero-finding closure
 
-Reviewed inputs: `.factory/review-1.md`, `.factory/polish-1.md`, `.factory/review-2.md`, `.factory/polish-2.md`, `.factory/review-3.md`, `.factory/polish-3.md`, and `.factory/review-4.md`. Source repair commit: `3f761b4`.
+Reviewed inputs: `.factory/review-1.md`, `.factory/polish-1.md`, `.factory/review-2.md`, `.factory/polish-2.md`, `.factory/review-3.md`, `.factory/polish-3.md`, and `.factory/review-4.md`. Source repair commit: `3f761b4`; final audited commit: `d0a8efb`.
 
 ## Evidence set
 
-- Tests: every command registered in `.factory/claims.json` from clean clone `/tmp/bpc-polish4-clean-qqIPDh/repo`; `npm test`; `npm run build`; and `npm run test:e2e` (46 browser executions).
+- Tests: every command registered in `.factory/claims.json` from clean clone `/tmp/bpc-polish4-final-Ll0dS7/repo` at `d0a8efb`; `npm test`; `npm run build`; and `npm run test:e2e` (46 browser executions).
 - Screenshots: `.factory/evidence/polish-4-home-desktop.png`, `.factory/evidence/polish-4-home-mobile.png`, `.factory/evidence/polish-4-demo-desktop.png`, `.factory/evidence/polish-4-demo-mobile.png`.
-- Live checks: <https://branching-problem-circle.sociobot.in>; `npm run test:live` passed 19/19 after deployment `deb0aeb7-a807-4c8c-bbf1-d9c82e8e465d`; `.factory/evidence/polish-4-live-report.json`; `.factory/evidence/polish-4-verify/verify.json`.
+- Live checks: <https://branching-problem-circle.sociobot.in>; `npm run test:live` passed 19/19 after deployment `cce2768b-d8b0-473d-b980-be92dae0ec3f`; `.factory/evidence/polish-4-live-report.json`; `.factory/evidence/polish-4-verify/verify.json`; Lighthouse 100/100/100/100 (`.factory/evidence/polish-4-lighthouse.json`).
 
 `S` below refers to the screenshot set above. `L` is the named live-production check in `test:live` at the cited URL.
 
@@ -29,21 +29,21 @@ Reviewed inputs: `.factory/review-1.md`, `.factory/polish-1.md`, `.factory/revie
 | F-1-13 | Retained JSON MIME delivery for the linked web manifest. | T `static deployment contract`; S home desktop; L cache and manifest headers. |
 | F-1-14 | Retained route-specific titles, descriptions, canonicals, OG/Twitter fields, icons, and social image. | T `ships complete route metadata and consistent static-page navigation`; S home desktop; L structure and axe for home, legal, offline, and 404. |
 | F-1-15 | Retained History API phase routes, reload/back behavior, h1 focus, and polite route announcements. | T `uses route titles, deep links, and a real 404 page`; S demo desktop; L structure and axe demo. |
-| F-1-16 | Retained the first screen, live sample preview, three steps, limits/privacy, templates, and footer in the landing order. | T `has the expected landing sections`; S home desktop/mobile; L cold first screen desktop/mobile. |
+| F-1-16 | Retained the first screen, live sample preview, three steps, limits/privacy, templates, and footer in the landing order. | T `keeps plain landing copy and the complete product sections`; S home desktop/mobile; L cold first screen desktop/mobile. |
 | F-1-17 | Retained consistent headers, legal footer, Param Factory credit, and version on every route. | T `ships complete route metadata and consistent static-page navigation`; S home desktop; L structure and axe for legal, offline, and 404. |
 | F-1-18 | Kept the audience label `For volunteer leaders of small math circles`. | T `@claim:demo-sample`; S home desktop/mobile; L cold first screen desktop/mobile. |
-| F-1-19 | Kept the h1 `Compare several approaches to one math problem`. | T `has the expected landing sections`; S home desktop/mobile; L cold first screen desktop/mobile. |
+| F-1-19 | Kept the h1 `Compare several approaches to one math problem`. | T `keeps plain landing copy and the complete product sections`; S home desktop/mobile; L cold first screen desktop/mobile. |
 | F-1-20 | Kept the concrete explanation using approaches, votes, hints, and discussion. | T `@claim:demo-sample`; S home desktop/mobile; L cold first screen desktop/mobile. |
 | F-1-21 | Kept concrete limits and removed the slogan. | T `@claim:no-public-sharing`; S home desktop/mobile; L cold first screen desktop/mobile. |
 | F-1-22 | Kept `Browse templates` and `Templates`. | T `@claim:included-templates`; S home desktop; L structure and axe home desktop. |
 | F-1-23 | Kept `Create a circle` beside the sample-first action. | T `@claim:demo-isolation`; S home desktop/mobile; L cold first screen desktop/mobile. |
 | F-1-24 | Kept browser-scoped storage wording. | T `@claim:browser-only`; S home desktop; L console and privacy request log. |
-| F-1-25 | Kept a descriptive illustration caption. | T `has the expected landing sections`; S home desktop/mobile; L structure and axe home desktop. |
+| F-1-25 | Kept a descriptive illustration caption. | T `keeps plain landing copy and the complete product sections`; S home desktop/mobile; L structure and axe home desktop. |
 | F-1-26 | Kept precise footer browser/offline facts. | T `@claim:browser-only`, `@claim:offline-reload`; S home desktop/mobile; L cold demo offline reload. |
 | F-1-27 | Kept the direct, audience-specific README opening. | T `@claim:demo-sample`; S home desktop; L cold first screen desktop. |
 | F-1-28 | Kept the README’s observable six-approach fact under the 22-word cap. | T `@claim:six-approaches`; S home desktop; L structure and axe home desktop. |
 | F-1-29 | Kept visitor demo copy free of database jargon. | T `@claim:demo-isolation`; S demo desktop; L demo exit disposal, pristine re-entry, and reset. |
-| F-1-30 | Kept circle/problem/approach/vote/hint/recap/demo as the visitor terms. | T `has the expected landing sections`; S home/demo desktop; L cold first screen desktop and structure/axe demo. |
+| F-1-30 | Kept circle/problem/approach/vote/hint/recap/demo as the visitor terms. | T `keeps plain landing copy and the complete product sections`; S home/demo desktop; L cold first screen desktop and structure/axe demo. |
 | F-1-31 | Kept the dialog context label `Templates`. | T `@claim:included-templates`; S home desktop; L structure and axe demo. |
 | F-1-32 | Kept `Choose a session template` as the dialog h2. | T `@claim:included-templates`; S home desktop; L structure and axe demo. |
 | F-1-33 | Kept abstract paid-pack language removed. | T `@claim:included-templates`; S home desktop; L console and privacy request log. |
