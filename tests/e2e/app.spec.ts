@@ -196,6 +196,20 @@ test('@claim:no-public-sharing has no account or public-service request in the s
   expect(urls.every(url => new URL(url).origin === 'http://127.0.0.1:4173')).toBeTruthy();
 });
 
+test('keeps plain landing copy and the complete product sections', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('For volunteer leaders of small math circles')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Compare several approaches to one math problem' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Try it with sample data' })).toBeVisible();
+  await expect(page.getByText('Opens a sample circle; nothing is saved.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'One problem, three approaches, a shared discussion' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Built for one shared device' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Starter templates are included' })).toBeVisible();
+  await expect(page.getByRole('img', { name: /Blank handmade ceramic tiles branch three ways/ })).toBeVisible();
+  await expect(page.getByText('The illustration shows one problem branching into three approaches.')).toBeVisible();
+  await expect(page.getByText(/Circle data stays in this browser · reloads offline after your first visit/)).toBeVisible();
+});
+
 test('enforces rights, recovers from bad imports, and keeps the prior circle', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Create a circle' }).click();

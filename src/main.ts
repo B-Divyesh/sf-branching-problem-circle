@@ -88,7 +88,7 @@ const esc = (value: unknown): string => String(value ?? '')
 function footer(): string {
   return `<footer class="site-footer">
     <span>Circle data stays in this browser · reloads offline after your first visit.</span>
-    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.3.0</span>
+    <span><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a> · Built by Param Factory · v1.3.1</span>
   </footer>`;
 }
 

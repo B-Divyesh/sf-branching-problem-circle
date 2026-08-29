@@ -171,7 +171,7 @@ await importPage.locator('#import-input').setInputFiles({
 const importPreview = importPage.getByRole('dialog', { name: 'Replace the current circle?' });
 assert.match(await importPreview.textContent(), /Circle to replace.*Imported live circle/s);
 await importPreview.getByRole('button', { name: 'Replace circle' }).click();
-assert.equal(await importPage.getByRole('heading', { level: 1 }).textContent(), 'Imported live circle');
+await importPage.getByRole('heading', { name: 'Imported live circle' }).waitFor();
 await importPage.reload();
 assert.equal(await importPage.getByRole('heading', { level: 1 }).textContent(), 'Imported live circle');
 record('rights enforcement, import recovery, preview, and persistence');
