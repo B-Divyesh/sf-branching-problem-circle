@@ -175,6 +175,39 @@ await importPage.getByRole('heading', { name: 'Imported live circle' }).waitFor(
 await importPage.reload();
 assert.equal(await importPage.getByRole('heading', { level: 1 }).textContent(), 'Imported live circle');
 record('rights enforcement, import recovery, preview, and persistence');
+
+const readCircleRecord = async () => importPage.evaluate(async () => {
+  const read = name => new Promise((resolve, reject) => {
+    const opened = indexedDB.open(name, 1);
+    opened.onerror = () => reject(opened.error);
+    opened.onupgradeneeded = () => opened.result.createObjectStore('circles');
+    opened.onsuccess = () => {
+      const db = opened.result;
+      const request = db.transaction('circles').objectStore('circles').get('active');
+      request.onsuccess = () => { resolve(request.result); db.close(); };
+      request.onerror = () => reject(request.error);
+    };
+  });
+  return { demo: await read('branching-problem-circle-demo'), real: await read('branching-problem-circle') };
+});
+await importPage.goto(`${base}/?demo=1`);
+await importPage.getByRole('heading', { name: 'A hexagon has six corners' }).waitFor();
+const beforeClear = await readCircleRecord();
+await importPage.goto(`${base}/`);
+await importPage.getByRole('heading', { name: 'Imported live circle' }).waitFor();
+importPage.once('dialog', dialog => void dialog.dismiss());
+await importPage.getByRole('button', { name: 'Clear circle' }).click();
+assert.equal(await importPage.getByRole('heading', { level: 1 }).textContent(), 'Imported live circle');
+assert.equal((await readCircleRecord()).real.title, 'Imported live circle');
+importPage.once('dialog', dialog => void dialog.accept());
+await importPage.getByRole('button', { name: 'Clear circle' }).click();
+await importPage.getByRole('heading', { name: 'Compare several approaches to one math problem' }).waitFor();
+await importPage.reload();
+assert.equal(await importPage.getByRole('heading', { level: 1 }).textContent(), 'Compare several approaches to one math problem');
+const afterClear = await readCircleRecord();
+assert.equal(afterClear.real, undefined);
+assert.deepEqual(afterClear.demo, beforeClear.demo);
+record('privacy deletion confirmation, reload, and demo isolation');
 await importContext.close();
 
 const { context: mobileContext, page: mobilePage } = await newPage(390, 844);

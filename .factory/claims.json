@@ -21,6 +21,13 @@
     "sandbox": "fresh /demo context; record every request through reveal flow"
   },
   {
+    "id": "data-deletion",
+    "claim": "Clear circle removes circle data from this browser.",
+    "where": "privacy notice — Your control",
+    "test": "npm run test:e2e -- --grep @claim:data-deletion",
+    "sandbox": "fresh context; seed the demo and a real circle, cancel clear once, then confirm clear, reload, and inspect both storage namespaces"
+  },
+  {
     "id": "single-device",
     "claim": "The circle is built for one shared device and has no room, pairing, sync, or public-share path.",
     "where": "landing limits heading, README introduction",

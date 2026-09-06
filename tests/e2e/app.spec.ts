@@ -60,6 +60,55 @@ test('@claim:browser-only keeps normal and demo flows same-origin', async ({ pag
   expect(requests.every(request => request.method === 'GET')).toBeTruthy();
 });
 
+test('@claim:data-deletion keeps a cancelled circle, then removes only the confirmed real circle', async ({ page }) => {
+  const readRecord = async () => page.evaluate(async () => {
+    const read = (name: string) => new Promise<unknown>((resolve, reject) => {
+      const opened = indexedDB.open(name, 1);
+      opened.onerror = () => reject(opened.error);
+      opened.onupgradeneeded = () => opened.result.createObjectStore('circles');
+      opened.onsuccess = () => {
+        const db = opened.result;
+        const request = db.transaction('circles').objectStore('circles').get('active');
+        request.onsuccess = () => { resolve(request.result); db.close(); };
+        request.onerror = () => reject(request.error);
+      };
+    });
+    return {
+      demo: await read('branching-problem-circle-demo'),
+      real: await read('branching-problem-circle')
+    };
+  });
+
+  await page.goto('/?demo=1');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('A hexagon has six corners');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create a circle' }).click();
+  await page.getByLabel('Circle title').fill('Circle to delete');
+  await page.getByLabel('Problem prompt').fill('This local circle should be removed only after confirmation.');
+  await page.getByLabel(/permission/).check();
+  await page.getByRole('button', { name: 'Save problem' }).click();
+  await expect(page.getByText('Problem saved on this device.')).toBeVisible();
+
+  const beforeClear = await readRecord();
+  expect(beforeClear.real).toMatchObject({ title: 'Circle to delete' });
+  expect(beforeClear.demo).toMatchObject({ title: 'A hexagon has six corners' });
+
+  page.once('dialog', dialog => void dialog.dismiss());
+  await page.getByRole('button', { name: 'Clear circle' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Circle to delete');
+  expect((await readRecord()).real).toMatchObject({ title: 'Circle to delete' });
+
+  page.once('dialog', dialog => void dialog.accept());
+  await page.getByRole('button', { name: 'Clear circle' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Compare several approaches to one math problem');
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Compare several approaches to one math problem');
+
+  const afterClear = await readRecord();
+  expect(afterClear.real).toBeUndefined();
+  expect(afterClear.demo).toEqual(beforeClear.demo);
+});
+
 test('@claim:single-device exposes only local shared-device controls and storage', async ({ page }) => {
   const urls: string[] = [];
   page.on('request', request => urls.push(request.url()));
