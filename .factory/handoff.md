@@ -1,3 +1,54 @@
+# Repair 1 handoff — Branching Problem Circle
+
+## Outcome
+
+**PASS.** Review 6 finding F-6-1 is closed. The public privacy promise, “Clear circle removes circle data from this browser,” is now a registered claim with one tagged outcome test.
+
+- Implementation commit: `d072be41ebd1cffe8db4cfd53b015e6d4a35ab50` (`test: cover privacy data deletion claim`).
+- Prior review/documentation baseline: `e973bf2910acca3a09f86ac35168099598d0d0db`.
+- Product behavior and bundled application source were unchanged. The expanded test and live verifier prove the already-working deletion flow instead of changing it.
+
+## What changed
+
+- Added `data-deletion` to `.factory/claims.json` for the privacy-page promise.
+- Added its only `@claim:data-deletion` Playwright test. It seeds the demo and a real circle, dismisses the first confirmation and proves the real circle remains, accepts the second confirmation, reloads, proves the real record is absent, and proves the demo record is unchanged.
+- Added the same outcome flow to `npm run test:live`, so production checks cancellation, confirmed deletion, reload persistence, and demo isolation.
+- Copied the 115-character verb-first catalog description to `/work/.evidence/catalog-description.txt`.
+
+## Job, audience, and first action
+
+On fresh 1440×900 desktop and 390×844 phone views before scrolling:
+
+- Job: compare several approaches to one math problem, collect anonymous votes, and reveal hints.
+- Audience: volunteer leaders of small math circles.
+- First action: **Try it with sample data**; it opens a sample circle and does not save it.
+
+## Verification
+
+Clean clone: `/tmp/bpc-repair-clean-Rzr9it/repo` at implementation commit `d072be4`.
+
+- `npm ci`: passed, 105 packages, 0 vulnerabilities.
+- `npm test`: passed 9/9.
+- `npm run build`: passed; `dist/index.html` produced. Initial JavaScript is 11.16 kB gzip and CSS is 5.90 kB gzip.
+- All 11 exact commands from `.factory/claims.json` passed in both desktop Chromium and the 390×844 phone project: `demo-sample`, `demo-isolation`, `browser-only`, `data-deletion`, `single-device`, `offline-reload`, `six-approaches`, `recap-export`, `json-import`, `included-templates`, and `no-public-sharing`.
+- `npm run test:e2e`: passed 48/48; Playwright recorded a passed final run.
+- Local `/opt/fleet/lib/verify-url.sh`: passed title, `lang=en`, one h1, main landmark, image alt text, labeled buttons, and no browser errors.
+- HTTPS `npm run test:live`: passed 20/20. This includes fresh desktop/phone first-screen checks, Axe scans, keyboard and mobile checks, demo reset/disposal, import durability, one-page A4 recap, offline reload, routes/404, headers, links, same-origin request trace, and the new deletion regression.
+- HTTPS `/opt/fleet/lib/verify-url.sh`: passed in 562 ms with no console errors.
+- Live mobile Lighthouse: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.14 s and CLS 0. Report: `/work/.evidence/repair-1-lighthouse.json`.
+
+## Earlier findings
+
+Review 6 rechecked all Review 1–5 and verification findings. The expanded live suite repeated their applicable behavior: demo isolation, claims registry, no dead paid offer, routes/metadata/404, keyboard focus, mobile targets, rights validation, import recovery and durability, response headers, manifest delivery, offline reload, privacy trace, and recap export. F-6-1 was the only remaining item and is now covered by `@claim:data-deletion`.
+
+## Deployment and remaining gaps
+
+`d072be4` was pushed to `origin/main`. This repair changes claim registration and verification code only; the static product bundle remains `app-DihcIyvW.js`, so there is no changed application image to roll out. The cold HTTPS product was nonetheless checked after the push with the expanded live suite and URL verifier.
+
+No known product gaps remain. This is a static local-first PWA; backend tenant, persistence-restart, health, and 429 checks do not apply.
+
+---
+
 # Review 6 handoff — Branching Problem Circle
 
 ## Review 6 outcome
