@@ -1,3 +1,21 @@
+# Review 6 handoff — Branching Problem Circle
+
+## Review 6 outcome
+
+**FAIL.** Product behavior passed, but one public privacy claim is unlisted and untested. `.factory/review-6.md` records finding F-6-1. This review changed no product code.
+
+## Review 6 verification
+
+- Implementation candidate: `d0a8efbd1d4025a627e7762023f4831b3df7d16f`; documentation SHA before this report: `0387759cd0d1618ad3ec516b77e8cad713b5946a`.
+- Fresh 390×844 phone and 1440×900 desktop live contexts passed the first-screen, demo, reset/disposal, keyboard, mobile, privacy-request, route, offline, and recovery checks.
+- Clean clone `/tmp/branching-problem-circle-review6-8JhBtv/repo`: all ten claim commands passed, `npm test` passed 9/9, `npm run build` produced `dist/`, `npm run test:e2e` passed 46/46, and the dependency audit found no vulnerability.
+- Clean `npm run test:live` passed 19/19. Standalone Axe found zero violations. Lighthouse mobile scored 100 in all four categories, with LCP 1.2 s and CLS 0.
+- The clean build and live deployment have identical JavaScript and CSS hashes.
+
+## Review 6 required next step
+
+Register the `/privacy/` promise “Clear circle removes circle data from this browser” in `.factory/claims.json` and add one matching tagged test covering cancel, confirmed deletion, reload, and demo-namespace preservation. The live action worked during this review, but manual evidence does not satisfy the claims contract.
+
 # Review 5 handoff — Branching Problem Circle
 
 ## Review 5 outcome
