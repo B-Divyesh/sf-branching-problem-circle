@@ -1,30 +1,29 @@
-# Verification 2 handoff — Branching Problem Circle
+# Review 7 handoff — Branching Problem Circle
 
 ## Result
 
-**PASS.** Independent verification found 0 findings and 0 untested claims.
+**PASS.** Strict review found 0 findings and 0 untested claims.
 
 - Implementation candidate: `d072be41ebd1cffe8db4cfd53b015e6d4a35ab50`
-- Documentation baseline: `6ca6e9bd26888504f97a89d410356531c8324052`
+- Documentation baseline: `3e7399c93b025fd1e53e34f472f4c6fe82fa36a9`
 - Live URL: <https://branching-problem-circle.sociobot.in>
-- Full report: `.factory/verification-2.md`
+- Full report: `.factory/review-7.md`
 
-No product code changed during verification.
+No product code changed.
 
-## What was verified
+## Verified
 
-- Fresh 1440×900 desktop and 390×844 phone first screens state the job, audience, first action, and result before scrolling.
-- The sample opens in one click with three approaches, six votes, reasons, an alternative idea, reveals, and a recap.
-- The demo banner persists. Reset restores the seed. Start for real deletes demo changes without copying them to real data.
-- All 11 declared claim commands passed in desktop and phone projects: 22/22 executions.
+- Fresh desktop and phone first screens state the job, audience, sample action, and result before scrolling.
+- The sample opens in one click with three approaches, six votes, reasons, an alternative idea, reveals, and a populated recap.
+- Demo reset, exit deletion, pristine re-entry, persistent labeling, and real-data isolation passed.
+- All 11 claim commands passed in both projects: 22/22 executions.
 - `npm test` passed 9/9, `npm run build` produced `dist/`, and `npm run test:e2e` passed 48/48.
-- The live verifier passed 20/20, including the repaired deletion claim, offline reload, accessibility, keyboard, phone targets, privacy traffic, imports, routes, links, headers, and the designed HTTP 404.
-- `verify-url.sh` passed with no browser errors.
+- The live verifier passed 20/20. The independent URL check found no browser error.
 - Lighthouse mobile scored 100/100/100/100; LCP was 1.28 s, CLS 0, and total blocking time 0 ms.
 - Live JavaScript, CSS, and service-worker hashes match the clean candidate build.
-- Every earlier finding from the verification and Reviews 1–6 was inspected and is closed with current evidence.
+- Every earlier finding through Review 6 was inspected and proved closed with current evidence.
 
-## How to verify
+## Run the checks
 
 ```sh
 npm ci
@@ -34,19 +33,18 @@ npm run test:e2e
 LIVE_BASE_URL=https://branching-problem-circle.sociobot.in npm run test:live
 ```
 
-The exact claim commands are in `.factory/claims.json`. Run each from a clean checkout.
+Run each exact claim command from `.factory/claims.json` separately for claim evidence.
 
 ## Evidence
 
-- Repository report: `.factory/verification-2.md`
-- Required report copy: `/work/.evidence/qa-report.md`
+- Repository report: `.factory/review-7.md`
+- Required copy: `/work/.evidence/qa-report.md`
 - Required result: `/work/.evidence/qa-result.json`
-- Live screenshots and report: `/work/.evidence/verification-2-live/`
-- URL check: `/work/.evidence/verification-2-url/`
-- Lighthouse JSON: `/work/.evidence/verification-2-lighthouse.json`
+- Live screenshots and JSON: `/work/.evidence/review-7-live/`
+- Lighthouse JSON: `/work/.evidence/review-7-lighthouse.json`
 
 ## Known gaps and next steps
 
-No product gap was found. This product is a static local-first PWA, so backend tenant, restart, health, and rate-limit checks do not apply. It has no paid tier.
+No product gap remains. Backend, rate-limit, tenant, restart, and paid-tier checks do not apply to this static local-first PWA.
 
-The first live-verifier attempt sampled the asynchronous invalid-import message before it rendered. A fresh direct check observed the correct result in 18 ms, and the unchanged full verifier then passed 20/20. No user-path defect was found.
+The first attempt to launch the live verifier from the clean clone occurred before dependencies were installed there because the setup command ran in the source workspace. It did not launch a browser or measure the product. After `npm ci` in the clone, all documented commands and measurements passed.
